@@ -3,20 +3,28 @@ package com.kogero.levelcounter
 import okhttp3.Interceptor
 import okhttp3.Response
 
-class LevelCounterInterceptor(private val cacheDuration: Int) :
-    Interceptor {
+
+class LevelCounterInterceptor : Interceptor {
+
+    var token: String = "";
+
+    fun Token(token: String) {
+        this.token = token;
+    }
+
     override fun intercept(chain: Interceptor.Chain): Response {
-        val request = chain.request()
+        var request = chain.request()
 
-        val url = request.url().newBuilder()
-            .addQueryParameter("format", "json")
-            .build()
-
-        val newRequest = request.newBuilder()
-            .url(url)
-            .addHeader("Cache-Control", "public, max-age=$cacheDuration")
-            .build()
-
-        return chain.proceed(newRequest)
+        if (request.header("No-Authentication") == null) {
+            //val token = getTokenFromSharedPreference();
+            //or use Token Function
+            if (!token.isNullOrEmpty()) {
+                val finalToken = "Bearer " + token
+                request = request.newBuilder()
+                    .addHeader("Authorization", finalToken)
+                    .build()
+            }
+        }
+        return chain.proceed(request)
     }
 }

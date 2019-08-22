@@ -1,3 +1,9 @@
 package com.kogero.levelcounter.model.responses
 
-class LoginResponse(val errorMessages: List<String>, val token: String)
+import com.google.gson.annotations.SerializedName
+
+data class LoginResponse(
+    @SerializedName("errorMessages")
+    val errorMessages: List<String>,
+    @SerializedName("token")
+    val token: String)

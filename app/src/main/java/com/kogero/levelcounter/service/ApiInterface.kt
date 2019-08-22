@@ -4,10 +4,12 @@ import com.kogero.levelcounter.model.requests.LoginRequest
 import com.kogero.levelcounter.model.responses.LoginResponse
 import retrofit2.Call
 import retrofit2.http.Body
+import retrofit2.http.Headers
 import retrofit2.http.POST
 
-interface LevelCounterApiService {
+interface ApiInterface {
 
-    @POST("/user/login")
-    fun login(@Body request: LoginRequest): Call<LoginResponse>
+    @POST("login")
+    @Headers("No-Authentication: true", "User-Agent: LevelCounterApp")
+    fun login(@Body LoginRequest: LoginRequest): Call<LoginResponse>
 }

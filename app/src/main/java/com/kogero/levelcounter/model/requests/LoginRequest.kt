@@ -1,3 +1,6 @@
 package com.kogero.levelcounter.model.requests
 
-class LoginRequest(val userName: String, val password: String)
+data class LoginRequest(
+    val email: String = "user@bloodstone.com",
+    val password: String = "Passw0rd",
+    val rememberMe: Boolean = false)
