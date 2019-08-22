@@ -6,10 +6,10 @@ import okhttp3.Response
 
 class LevelCounterInterceptor : Interceptor {
 
-    var token: String = "";
+    var token: String = ""
 
     fun Token(token: String) {
-        this.token = token;
+        this.token = token
     }
 
     override fun intercept(chain: Interceptor.Chain): Response {

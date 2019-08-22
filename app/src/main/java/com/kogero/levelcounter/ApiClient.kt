@@ -9,7 +9,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object ApiClient {
 
-    private val BASE_URL = "https://hotelbookingapp.azurewebsites.net//api/"
+    private const val BASE_URL = "http://c3b54c9e.ngrok.io/api/"
     val getClient: ApiInterface
         get() {
 

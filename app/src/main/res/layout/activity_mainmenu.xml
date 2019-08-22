@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="10dp"
+    android:gravity="bottom"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="330dp"
+        android:layout_marginBottom="9dp"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/btnNewGame"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_marginBottom="15dp"
+            android:background="@drawable/button_profile"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:text="New Game" />
+
+        <Button
+            android:id="@+id/btnLoadGame"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_marginBottom="15dp"
+            android:background="@drawable/button_profile"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:text="Load Game" />
+
+        <Button
+            android:id="@+id/btnFriends"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_marginBottom="15dp"
+            android:background="@drawable/button_profile"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:text="Friends" />
+
+        <Button
+            android:id="@+id/btnQuit"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_marginBottom="15dp"
+            android:background="@drawable/button_profile"
+            android:textColor="@color/white"
+            android:text="Quit"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+
+</RelativeLayout>
