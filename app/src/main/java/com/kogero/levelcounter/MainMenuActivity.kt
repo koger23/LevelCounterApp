@@ -1,6 +1,7 @@
 package com.kogero.levelcounter
 
 import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -14,6 +15,10 @@ class MainMenuActivity : AppCompatActivity() {
         actionBar?.hide()
         setContentView(R.layout.activity_mainmenu)
 
+        val btnFriends = findViewById<Button>(R.id.btnFriends)
+        btnFriends.setOnClickListener {
+            val intent = Intent(this, FriendsActivity::class.java)
+            startActivity(intent)}
         val btnQuit = findViewById<Button>(R.id.btnQuit)
         btnQuit.setOnClickListener {quitMsg()}
     }
