@@ -21,8 +21,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".MainMenuActivity" />
-        <activity
-            android:name=".SignUpActivity" />
+        <activity android:name=".SignUpActivity" />
+        <activity android:name=".FriendsActivity" />
     </application>
 
 </manifest>
