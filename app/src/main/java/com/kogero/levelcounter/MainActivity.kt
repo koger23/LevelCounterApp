@@ -1,5 +1,6 @@
 package com.kogero.levelcounter
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -17,19 +18,19 @@ class MainActivity : AppCompatActivity() {
 
     var token = ""
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
         actionBar?.hide()
         setContentView(R.layout.activity_main)
 
-        val userName = findViewById<EditText>(R.id.editTextUserName).text.toString()
-        val password = findViewById<EditText>(R.id.editTextPassword).text.toString()
-        val loginRequest = LoginRequest(email = userName, password = password)
-
         val btnSignUp = findViewById<Button>(R.id.buttonSignIn)
         btnSignUp.setOnClickListener {
-            login(loginRequest)
+            val userName = findViewById<EditText>(R.id.editTextUserName).text.toString()
+            val password = findViewById<EditText>(R.id.editTextPassword).text.toString()
+            val loginRequest = LoginRequest(userName = userName, password = password)
+            login(loginRequest, this)
         }
 
         val btnLoadGame = findViewById<Button>(R.id.buttonSignUp)
@@ -39,7 +40,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun login(loginRequest: LoginRequest) {
+    override fun onResume() {
+        super.onResume()
+        window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
+        actionBar?.hide()
+    }
+
+    private fun login(loginRequest: LoginRequest, context: Context) {
         val call: Call<LoginResponse> = ApiClient.getClient.login(loginRequest)
         call.enqueue(object : Callback<LoginResponse> {
 
@@ -49,8 +56,11 @@ class MainActivity : AppCompatActivity() {
             ) {
                 Toast.makeText(this@MainActivity, "Code: " + response!!.code(), Toast.LENGTH_SHORT)
                     .show()
-                token = response.body()!!.token
-                Toast.makeText(this@MainActivity, "Token: $token", Toast.LENGTH_SHORT).show()
+                if (response!!.code() == 200) {
+                    token = response.body()!!.token
+                    val intent = Intent(context, MainMenuActivity::class.java)
+                    startActivity(intent)
+                }
             }
 
             override fun onFailure(call: Call<LoginResponse>?, t: Throwable?) {
