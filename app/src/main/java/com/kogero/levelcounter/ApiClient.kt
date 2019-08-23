@@ -9,13 +9,13 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object ApiClient {
 
-    private const val BASE_URL = "http://c3b54c9e.ngrok.io/api/"
+    private const val BASE_URL = "https://0a25d406.ngrok.io/api/"
     val getClient: ApiInterface
         get() {
-
             val gson = GsonBuilder()
                 .setLenient()
                 .create()
+
             val client = OkHttpClient.Builder()
                 .build()
 
@@ -24,9 +24,6 @@ object ApiClient {
                 .client(client)
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build()
-
             return retrofit.create(ApiInterface::class.java)
-
         }
-
 }

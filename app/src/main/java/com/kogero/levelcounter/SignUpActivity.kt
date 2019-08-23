@@ -30,6 +30,7 @@ class SignUpActivity : AppCompatActivity() {
             val verifyPassword = findViewById<EditText>(R.id.editTextVerifyPassword).text.toString()
             val male = findViewById<RadioButton>(R.id.radioBtnMale).isChecked
             var gender = "female"
+
             if (male) {
                 gender = "male"
             }
