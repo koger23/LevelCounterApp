@@ -2,11 +2,12 @@ package com.kogero.levelcounter
 
 import android.os.Bundle
 import android.view.View
-import android.widget.*
+import android.widget.Button
+import android.widget.EditText
+import android.widget.RadioButton
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.kogero.levelcounter.model.requests.LoginRequest
 import com.kogero.levelcounter.model.requests.SignUpRequest
-import com.kogero.levelcounter.model.responses.LoginResponse
 import com.kogero.levelcounter.model.responses.SignUpResponse
 import retrofit2.Call
 import retrofit2.Callback
@@ -60,14 +61,23 @@ class SignUpActivity : AppCompatActivity() {
                 call: Call<SignUpResponse>,
                 response: Response<SignUpResponse>
             ) {
-                Toast.makeText(this@SignUpActivity, "Code: " + response!!.code(), Toast.LENGTH_SHORT)
+                Toast.makeText(this@SignUpActivity, "Code: " + response.code(), Toast.LENGTH_SHORT)
                     .show()
+                if (response.code() == 200) {
+                    Toast.makeText(
+                        this@SignUpActivity,
+                        "Registration successful",
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+                    finish()
+                }
             }
 
             override fun onFailure(call: Call<SignUpResponse>, t: Throwable) {
                 Toast.makeText(
                     this@SignUpActivity,
-                    "Cannot connect to the server.",
+                    "Could not connect to the server.",
                     Toast.LENGTH_SHORT
                 ).show()
             }

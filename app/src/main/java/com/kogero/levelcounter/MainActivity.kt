@@ -3,8 +3,6 @@ package com.kogero.levelcounter
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.view.Window
-import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -58,7 +56,7 @@ class MainActivity : AppCompatActivity() {
             override fun onFailure(call: Call<LoginResponse>?, t: Throwable?) {
                 Toast.makeText(
                     this@MainActivity,
-                    "Cannot connect to the server.",
+                    "Could not connect to the server.",
                     Toast.LENGTH_SHORT
                 ).show()
             }
