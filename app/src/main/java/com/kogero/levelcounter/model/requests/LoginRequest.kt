@@ -1,5 +1,5 @@
 package com.kogero.levelcounter.model.requests
 
 data class LoginRequest(
-    val email: String,
+    val userName: String,
     val password: String)
