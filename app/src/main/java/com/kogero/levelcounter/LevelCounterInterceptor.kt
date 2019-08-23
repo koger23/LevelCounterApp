@@ -8,7 +8,7 @@ class LevelCounterInterceptor : Interceptor {
 
     var token: String = ""
 
-    fun Token(token: String) {
+    fun token(token: String) {
         this.token = token
     }
 
@@ -18,10 +18,9 @@ class LevelCounterInterceptor : Interceptor {
         if (request.header("No-Authentication") == null) {
             //val token = getTokenFromSharedPreference();
             //or use Token Function
-            if (!token.isNullOrEmpty()) {
-                val finalToken = "Bearer " + token
+            if (token.isNotEmpty()) {
                 request = request.newBuilder()
-                    .addHeader("Authorization", finalToken)
+                    .addHeader("Authorization", "Bearer $token")
                     .build()
             }
         }

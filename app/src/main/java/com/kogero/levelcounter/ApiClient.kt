@@ -17,6 +17,7 @@ object ApiClient {
                 .create()
 
             val client = OkHttpClient.Builder()
+                .addInterceptor(LevelCounterInterceptor())
                 .build()
 
             val retrofit = Retrofit.Builder()
