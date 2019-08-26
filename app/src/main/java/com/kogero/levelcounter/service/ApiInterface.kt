@@ -1,15 +1,13 @@
 package com.kogero.levelcounter.service
 
+import com.kogero.levelcounter.model.Statistics
 import com.kogero.levelcounter.model.responses.UserShortResponse
 import com.kogero.levelcounter.model.requests.LoginRequest
 import com.kogero.levelcounter.model.requests.SignUpRequest
 import com.kogero.levelcounter.model.responses.LoginResponse
 import com.kogero.levelcounter.model.responses.SignUpResponse
 import retrofit2.Call
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.Headers
-import retrofit2.http.POST
+import retrofit2.http.*
 
 interface ApiInterface {
 
@@ -23,4 +21,7 @@ interface ApiInterface {
 
     @GET("user/friends")
     fun getFriends(): Call<List<UserShortResponse>>
+
+    @GET("statistics/{id}")
+    fun getStatisticsById(@Path("id") id : Int): Call<Statistics>
 }

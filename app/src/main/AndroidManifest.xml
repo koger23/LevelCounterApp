@@ -23,6 +23,7 @@
         <activity android:name=".MainMenuActivity" />
         <activity android:name=".SignUpActivity" />
         <activity android:name=".FriendsActivity" />
+        <activity android:name=".StatisticsActivity" />
     </application>
 
 </manifest>

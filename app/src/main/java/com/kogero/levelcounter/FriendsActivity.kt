@@ -1,20 +1,22 @@
 package com.kogero.levelcounter
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.os.Parcelable
 import android.view.View
 import android.widget.AdapterView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.kogero.levelcounter.model.RecyclerViewClickListener
+import com.kogero.levelcounter.model.Statistics
 import com.kogero.levelcounter.model.responses.UserShortResponse
-import kotlinx.android.synthetic.main.activity_friends.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import com.kogero.levelcounter.model.RecyclerViewClickListener
-
-
+import android.app.Activity
 
 
 class FriendsActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
@@ -44,20 +46,11 @@ class FriendsActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                 recyclerView,
                 object : RecyclerViewClickListener {
                     override fun onClick(view: View, position: Int) {
-                        Toast.makeText(
-                            applicationContext,
-                            friendList[position].userName + " is clicked!",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        val statisticsId = friendList[position].statisticsId
+                        getStatisticsById(statisticsId, this@FriendsActivity)
                     }
 
                     override fun onLongClick(view: View, position: Int) {
-                        Toast.makeText(
-                            applicationContext,
-                            friendList[position].userName + " is long pressed!",
-                            Toast.LENGTH_SHORT
-                        ).show()
-
                     }
                 })
         )
@@ -72,21 +65,76 @@ class FriendsActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
             ) {
                 Toast.makeText(this@FriendsActivity, "Code: " + response.code(), Toast.LENGTH_SHORT)
                     .show()
-                val userDatas: List<UserShortResponse>? = response.body()
+                val userData: List<UserShortResponse>? = response.body()
                 if (response.code() == 200) {
                     println(response.body().toString())
-                    if (userDatas != null) {
-                        for (userData in userDatas) {
+                    if (userData != null) {
+                        for (userData in userData) {
                             friendList.add(userData)
-                            println("user id: " + userData.userName)
                         }
                         adapter.notifyDataSetChanged()
                     }
+                } else if (response.code() == 401) {
+                    Toast.makeText(this@FriendsActivity, "Login expired.", Toast.LENGTH_SHORT)
+                        .show()
+                    val intent = Intent(this@FriendsActivity, MainActivity::class.java)
+                    startActivity(intent)
                 }
             }
 
             override fun onFailure(call: Call<List<UserShortResponse>>, t: Throwable) {
-                Toast.makeText(this@FriendsActivity, "Could not connect to the server", Toast.LENGTH_SHORT)
+                Toast.makeText(
+                    this@FriendsActivity,
+                    "Could not connect to the server",
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
+            }
+        })
+    }
+
+    private fun getStatisticsById(
+        id: Int,
+        context: Context
+    ) {
+        val call: Call<Statistics> = ApiClient.getClient.getStatisticsById(id)
+        call.enqueue(object : Callback<Statistics> {
+            override fun onResponse(
+                call: Call<Statistics>,
+                response: Response<Statistics>
+            ) {
+                Toast.makeText(
+                    this@FriendsActivity,
+                    "Code: " + response.code(),
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
+                val statistics: Statistics? = response.body()
+                if (response.code() == 200) {
+                    if (statistics != null) {
+                        Toast.makeText(
+                            context,
+                            "Statistics id: ${statistics.statisticsId}",
+                            Toast.LENGTH_SHORT
+                        )
+                            .show()
+                        val intent = Intent(this@FriendsActivity, StatisticsActivity::class.java)
+                        intent.putExtra("STATISTICS", statistics)
+                        startActivity(intent)
+                    }
+                } else if (response.code() == 401) {
+                    Toast.makeText(context, "Login expired.", Toast.LENGTH_SHORT).show()
+                    val intent = Intent(context, MainActivity::class.java)
+                    startActivity(intent)
+                }
+            }
+
+            override fun onFailure(call: Call<Statistics>, t: Throwable) {
+                Toast.makeText(
+                    this@FriendsActivity,
+                    "Could not connect to the server",
+                    Toast.LENGTH_SHORT
+                )
                     .show()
             }
         })
@@ -95,5 +143,4 @@ class FriendsActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
     companion object {
         fun newInstance(): FriendsActivity = FriendsActivity()
     }
-
 }

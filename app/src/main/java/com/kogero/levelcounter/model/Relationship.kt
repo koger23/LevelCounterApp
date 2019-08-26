@@ -1,6 +1,6 @@
 package com.kogero.levelcounter.model
 
-class Relationship (
+data class Relationship (
     val relationshipId : Int,
     val userId : String,
     val relatingUserId: String,

@@ -62,7 +62,10 @@ class MainActivity: AppCompatActivity() {
                     token = response.body()!!.token
                     ApiClient.saveToken(token)
                     val intent = Intent(context, MainMenuActivity::class.java)
-                    intent.putExtra("UserData", token)
+                    startActivity(intent)
+                } else if (response!!.code() == 401) {
+                    Toast.makeText(context, "Login expired.", Toast.LENGTH_SHORT).show()
+                    val intent = Intent(context, MainActivity::class.java)
                     startActivity(intent)
                 }
             }

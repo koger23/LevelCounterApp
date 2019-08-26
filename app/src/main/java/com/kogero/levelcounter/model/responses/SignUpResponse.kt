@@ -1,6 +1,6 @@
 package com.kogero.levelcounter.model.responses
 
-class SignUpResponse(
+data class SignUpResponse(
     val message: List<String>,
     val UserName: List<String>,
     val Password: List<String>,
