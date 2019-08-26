@@ -3,9 +3,9 @@ package com.kogero.levelcounter
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.os.Parcelable
 import android.view.View
 import android.widget.AdapterView
+import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -16,7 +16,6 @@ import com.kogero.levelcounter.model.responses.UserShortResponse
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import android.app.Activity
 
 
 class FriendsActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
@@ -24,14 +23,20 @@ class FriendsActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
     override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
     }
 
-    val friendList: ArrayList<UserShortResponse> = ArrayList()
-    var adapter = FriendsAdapter(this, friendList)
+    private val friendList: ArrayList<UserShortResponse> = ArrayList()
+    var adapter = UserShortResponseAdapter(this, friendList)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
         actionBar?.hide()
         setContentView(R.layout.activity_friends)
+
+        val btnSearch = findViewById<ImageButton>(R.id.btnSearch)
+        btnSearch.setOnClickListener {
+            val intent = Intent(this, UsersActivity::class.java)
+            startActivity(intent)
+        }
 
         getFriends()
 
@@ -95,7 +100,8 @@ class FriendsActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
         context: Context,
         userShortResponse: UserShortResponse
     ) {
-        val call: Call<Statistics> = ApiClient.getClient.getStatisticsById(userShortResponse.statisticsId)
+        val call: Call<Statistics> =
+            ApiClient.getClient.getStatisticsById(userShortResponse.statisticsId)
         call.enqueue(object : Callback<Statistics> {
             override fun onResponse(
                 call: Call<Statistics>,

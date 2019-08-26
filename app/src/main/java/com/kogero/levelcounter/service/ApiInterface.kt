@@ -24,4 +24,7 @@ interface ApiInterface {
 
     @GET("statistics/{id}")
     fun getStatisticsById(@Path("id") id : Int): Call<Statistics>
+
+    @GET("user/userlist")
+    fun getAllUsers() : Call<List<UserShortResponse>>
 }

@@ -24,6 +24,7 @@
         <activity android:name=".SignUpActivity" />
         <activity android:name=".FriendsActivity" />
         <activity android:name=".StatisticsActivity" />
+        <activity android:name=".UsersActivity" />
     </application>
 
 </manifest>
