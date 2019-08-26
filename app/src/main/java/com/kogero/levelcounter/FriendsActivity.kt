@@ -108,7 +108,7 @@ class FriendsActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                 response: Response<Statistics>
             ) {
                 Toast.makeText(
-                    this@FriendsActivity,
+                    context,
                     "Code: " + response.code(),
                     Toast.LENGTH_SHORT
                 )
@@ -116,7 +116,7 @@ class FriendsActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                 val statistics: Statistics? = response.body()
                 if (response.code() == 200) {
                     if (statistics != null) {
-                        val intent = Intent(this@FriendsActivity, StatisticsActivity::class.java)
+                        val intent = Intent(context, StatisticsActivity::class.java)
                         intent.putExtra("STATISTICS", statistics)
                         intent.putExtra("USERNAME", userShortResponse.userName)
                         startActivity(intent)
@@ -130,7 +130,7 @@ class FriendsActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
 
             override fun onFailure(call: Call<Statistics>, t: Throwable) {
                 Toast.makeText(
-                    this@FriendsActivity,
+                    context,
                     "Could not connect to the server",
                     Toast.LENGTH_SHORT
                 )

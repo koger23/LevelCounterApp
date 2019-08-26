@@ -10,6 +10,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.kogero.levelcounter.model.RecyclerViewClickListener
+import com.kogero.levelcounter.model.Statistics
 import com.kogero.levelcounter.model.responses.UserShortResponse
 import retrofit2.Call
 import retrofit2.Callback
@@ -49,7 +51,65 @@ class UsersActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                 return false
             }
         })
+
+        recyclerView.addOnItemTouchListener(
+            RecyclerViewTouchListener(
+                applicationContext,
+                recyclerView,
+                object : RecyclerViewClickListener {
+                    override fun onClick(view: View, position: Int) {
+                        val user = userList[position]
+                        getStatisticsById(this@UsersActivity, user)
+                    }
+
+                    override fun onLongClick(view: View, position: Int) {
+                    }
+                })
+        )
         getAllUsers(this@UsersActivity)
+    }
+
+    private fun getStatisticsById(
+        context: Context,
+        userShortResponse: UserShortResponse
+    ) {
+        val call: Call<Statistics> =
+            ApiClient.getClient.getStatisticsById(userShortResponse.statisticsId)
+        call.enqueue(object : Callback<Statistics> {
+            override fun onResponse(
+                call: Call<Statistics>,
+                response: Response<Statistics>
+            ) {
+                Toast.makeText(
+                    context,
+                    "Code: " + response.code(),
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
+                val statistics: Statistics? = response.body()
+                if (response.code() == 200) {
+                    if (statistics != null) {
+                        val intent = Intent(context, StatisticsActivity::class.java)
+                        intent.putExtra("STATISTICS", statistics)
+                        intent.putExtra("USERNAME", userShortResponse.userName)
+                        startActivity(intent)
+                    }
+                } else if (response.code() == 401) {
+                    Toast.makeText(context, "Login expired.", Toast.LENGTH_SHORT).show()
+                    val intent = Intent(context, MainActivity::class.java)
+                    startActivity(intent)
+                }
+            }
+
+            override fun onFailure(call: Call<Statistics>, t: Throwable) {
+                Toast.makeText(
+                    context,
+                    "Could not connect to the server",
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
+            }
+        })
     }
 
     private fun getAllUsers(
