@@ -1,9 +1,9 @@
 package com.kogero.levelcounter
 
-import android.content.res.Resources
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
+import android.widget.TableRow
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.kogero.levelcounter.model.Statistics
 
@@ -14,14 +14,25 @@ class StatisticsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
         actionBar?.hide()
-        try {
-            val statistics = intent.extras.getParcelable<Statistics>("STATISTICS")
+        setContentView(R.layout.actitvity_playerstat)
 
-            Toast.makeText(this, "OK", Toast.LENGTH_SHORT).show()
-            Toast.makeText(this, "${statistics.statisticsId}", Toast.LENGTH_SHORT).show()
-        } catch (e: Resources.NotFoundException) {
-            Toast.makeText(this, "Error occurred: ${e.message}", Toast.LENGTH_SHORT).show()
-        }
+        val userName = intent.extras.getString("USERNAME")
+        val tvUserName = findViewById<TextView>(R.id.tvUserName)
+        tvUserName.text = userName
+
+        val statistics = intent.extras.getParcelable<Statistics>("STATISTICS")
+
+        val tvGamesPlayed = findViewById<TextView>(R.id.tvGamesPlayed)
+        tvGamesPlayed.text = statistics.gamesPlayed.toString()
+
+        val tvRoundsPlayed = findViewById<TextView>(R.id.tvRoundsPlayed)
+        tvRoundsPlayed.text = statistics.roundsPlayed.toString()
+
+        val tvWins = findViewById<TextView>(R.id.tvWins)
+        tvWins.text = statistics.wins.toString()
+
+        val tvTimePlayed = findViewById<TextView>(R.id.tvTimePlayed)
+        tvTimePlayed.text = statistics.playTime.toString()
     }
 
     companion object {

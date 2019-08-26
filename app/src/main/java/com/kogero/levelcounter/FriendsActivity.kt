@@ -22,7 +22,6 @@ import android.app.Activity
 class FriendsActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
 
     override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-        Toast.makeText(this, "WTF", Toast.LENGTH_SHORT).show()
     }
 
     val friendList: ArrayList<UserShortResponse> = ArrayList()
@@ -46,8 +45,8 @@ class FriendsActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                 recyclerView,
                 object : RecyclerViewClickListener {
                     override fun onClick(view: View, position: Int) {
-                        val statisticsId = friendList[position].statisticsId
-                        getStatisticsById(statisticsId, this@FriendsActivity)
+                        val user = friendList[position]
+                        getStatisticsById(this@FriendsActivity, user)
                     }
 
                     override fun onLongClick(view: View, position: Int) {
@@ -67,7 +66,6 @@ class FriendsActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                     .show()
                 val userData: List<UserShortResponse>? = response.body()
                 if (response.code() == 200) {
-                    println(response.body().toString())
                     if (userData != null) {
                         for (userData in userData) {
                             friendList.add(userData)
@@ -94,10 +92,10 @@ class FriendsActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
     }
 
     private fun getStatisticsById(
-        id: Int,
-        context: Context
+        context: Context,
+        userShortResponse: UserShortResponse
     ) {
-        val call: Call<Statistics> = ApiClient.getClient.getStatisticsById(id)
+        val call: Call<Statistics> = ApiClient.getClient.getStatisticsById(userShortResponse.statisticsId)
         call.enqueue(object : Callback<Statistics> {
             override fun onResponse(
                 call: Call<Statistics>,
@@ -112,14 +110,9 @@ class FriendsActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                 val statistics: Statistics? = response.body()
                 if (response.code() == 200) {
                     if (statistics != null) {
-                        Toast.makeText(
-                            context,
-                            "Statistics id: ${statistics.statisticsId}",
-                            Toast.LENGTH_SHORT
-                        )
-                            .show()
                         val intent = Intent(this@FriendsActivity, StatisticsActivity::class.java)
                         intent.putExtra("STATISTICS", statistics)
+                        intent.putExtra("USERNAME", userShortResponse.userName)
                         startActivity(intent)
                     }
                 } else if (response.code() == 401) {
