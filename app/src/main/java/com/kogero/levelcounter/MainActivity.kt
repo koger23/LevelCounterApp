@@ -14,10 +14,9 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class MainActivity : AppCompatActivity() {
+class MainActivity: AppCompatActivity() {
 
-    var token = ""
-
+    var token: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,7 +45,10 @@ class MainActivity : AppCompatActivity() {
         actionBar?.hide()
     }
 
-    private fun login(loginRequest: LoginRequest, context: Context) {
+    private fun login(
+        loginRequest: LoginRequest,
+        context: Context
+    ) {
         val call: Call<LoginResponse> = ApiClient.getClient.login(loginRequest)
         call.enqueue(object : Callback<LoginResponse> {
 
@@ -58,7 +60,9 @@ class MainActivity : AppCompatActivity() {
                     .show()
                 if (response!!.code() == 200) {
                     token = response.body()!!.token
+                    ApiClient.saveToken(token)
                     val intent = Intent(context, MainMenuActivity::class.java)
+                    intent.putExtra("UserData", token)
                     startActivity(intent)
                 }
             }

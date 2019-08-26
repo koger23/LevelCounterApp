@@ -2,14 +2,22 @@ package com.kogero.levelcounter
 
 import com.google.gson.GsonBuilder
 import com.kogero.levelcounter.service.ApiInterface
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 
 object ApiClient {
 
-    private const val BASE_URL = "https://0a25d406.ngrok.io/api/"
+    var token: String = ""
+
+    fun saveToken(token: String) {
+        this.token = token
+    }
+
+    private const val BASE_URL = "https://f5194d27.ngrok.io/api/"
     val getClient: ApiInterface
         get() {
             val gson = GsonBuilder()
@@ -27,4 +35,22 @@ object ApiClient {
                 .build()
             return retrofit.create(ApiInterface::class.java)
         }
+
+    class LevelCounterInterceptor : Interceptor {
+
+        override fun intercept(chain: Interceptor.Chain): Response {
+            var request = chain.request()
+
+            if (request.header("No-Authentication") == null) {
+                //val token = getTokenFromSharedPreference();
+                //or use Token Function
+                if (token.isNotEmpty()) {
+                    request = request.newBuilder()
+                        .addHeader("Authorization", "Bearer $token")
+                        .build()
+                }
+            }
+            return chain.proceed(request)
+        }
+    }
 }

@@ -1,6 +1,6 @@
 package com.kogero.levelcounter.service
 
-import com.kogero.levelcounter.model.Relationship
+import com.kogero.levelcounter.model.responses.UserShortResponse
 import com.kogero.levelcounter.model.requests.LoginRequest
 import com.kogero.levelcounter.model.requests.SignUpRequest
 import com.kogero.levelcounter.model.responses.LoginResponse
@@ -22,5 +22,5 @@ interface ApiInterface {
     fun signUp(@Body signUpRequest: SignUpRequest): Call<SignUpResponse>
 
     @GET("user/friends")
-    fun getFriends(): Call<List<Relationship>>
+    fun getFriends(): Call<List<UserShortResponse>>
 }

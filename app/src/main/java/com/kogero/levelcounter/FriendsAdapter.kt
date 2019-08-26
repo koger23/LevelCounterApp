@@ -6,23 +6,29 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
-import com.kogero.levelcounter.model.Relationship
+import com.kogero.levelcounter.model.responses.UserShortResponse
 import kotlinx.android.synthetic.main.friend_list_item.view.*
+import android.widget.AdapterView.OnItemClickListener
 
-class FriendsAdapter(private val context: Context, private val items: ArrayList<Relationship>) :
+
+
+class FriendsAdapter(
+    private val context: Context,
+    private val items: ArrayList<UserShortResponse>
+) :
     RecyclerView.Adapter<FriendsAdapter.FriendViewHolder>() {
 
     override fun onBindViewHolder(holder: FriendViewHolder, position: Int) {
-        holder.friendName.text = items[position].userId
+        holder.friendName.text = items[position].userName
+        val item: UserShortResponse = items[position]
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FriendViewHolder {
         return FriendViewHolder(
             LayoutInflater.from(context).inflate(
-                R.layout.friend_list_item,
-                parent,
-                false
+                R.layout.friend_list_item, parent, false
             )
         )
     }
