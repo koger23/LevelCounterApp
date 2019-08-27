@@ -34,12 +34,12 @@
             android:textDirection="firstStrongLtr"
             android:textSize="24sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/img_relationship_state"
+            app:layout_constraintEnd_toStartOf="@+id/btnImg_relationship_state"
             app:layout_constraintStart_toEndOf="@+id/imageView"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageView
-            android:id="@+id/img_relationship_state"
+        <ImageButton
+            android:id="@+id/btnImg_relationship_state"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_marginRight="20dp"
@@ -47,7 +47,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/friendName"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@mipmap/add_friend" />
+            app:srcCompat="@mipmap/friend" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

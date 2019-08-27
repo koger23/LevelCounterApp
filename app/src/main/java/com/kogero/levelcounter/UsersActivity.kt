@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.kogero.levelcounter.model.RecyclerViewClickListener
 import com.kogero.levelcounter.model.Statistics
+import com.kogero.levelcounter.model.UserListViewModel
 import com.kogero.levelcounter.model.responses.UserShortResponse
 import retrofit2.Call
 import retrofit2.Callback
@@ -23,7 +24,7 @@ class UsersActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
     override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
     }
 
-    private var userList: ArrayList<UserShortResponse> = ArrayList()
+    private var userList: ArrayList<UserListViewModel> = ArrayList()
     private var adapter = UsersAdapter(this, userList)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,7 +72,7 @@ class UsersActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
 
     private fun getStatisticsById(
         context: Context,
-        userShortResponse: UserShortResponse
+        userShortResponse: UserListViewModel
     ) {
         val call: Call<Statistics> =
             ApiClient.getClient.getStatisticsById(userShortResponse.statisticsId)
@@ -115,12 +116,12 @@ class UsersActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
     private fun getAllUsers(
         context: Context
     ) {
-        val call: Call<List<UserShortResponse>> =
+        val call: Call<List<UserListViewModel>> =
             ApiClient.getClient.getAllUsers()
-        call.enqueue(object : Callback<List<UserShortResponse>> {
+        call.enqueue(object : Callback<List<UserListViewModel>> {
             override fun onResponse(
-                call: Call<List<UserShortResponse>>,
-                response: Response<List<UserShortResponse>>
+                call: Call<List<UserListViewModel>>,
+                response: Response<List<UserListViewModel>>
             ) {
                 Toast.makeText(
                     this@UsersActivity,
@@ -128,7 +129,7 @@ class UsersActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                     Toast.LENGTH_SHORT
                 )
                     .show()
-                val userResponseList: List<UserShortResponse>? = response.body()
+                val userResponseList: List<UserListViewModel>? = response.body()
                 if (response.code() == 200) {
                     if (userResponseList != null) {
                         for (user in userResponseList) {
@@ -143,7 +144,7 @@ class UsersActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                 }
             }
 
-            override fun onFailure(call: Call<List<UserShortResponse>>, t: Throwable) {
+            override fun onFailure(call: Call<List<UserListViewModel>>, t: Throwable) {
                 Toast.makeText(
                     this@UsersActivity,
                     "Could not connect to the server",

@@ -1,6 +1,7 @@
 package com.kogero.levelcounter.service
 
 import com.kogero.levelcounter.model.Statistics
+import com.kogero.levelcounter.model.UserListViewModel
 import com.kogero.levelcounter.model.responses.UserShortResponse
 import com.kogero.levelcounter.model.requests.LoginRequest
 import com.kogero.levelcounter.model.requests.SignUpRequest
@@ -26,5 +27,5 @@ interface ApiInterface {
     fun getStatisticsById(@Path("id") id : Int): Call<Statistics>
 
     @GET("user/userlist")
-    fun getAllUsers() : Call<List<UserShortResponse>>
+    fun getAllUsers() : Call<List<UserListViewModel>>
 }
