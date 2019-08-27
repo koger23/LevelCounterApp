@@ -7,6 +7,7 @@ import com.kogero.levelcounter.model.requests.LoginRequest
 import com.kogero.levelcounter.model.requests.SignUpRequest
 import com.kogero.levelcounter.model.responses.LoginResponse
 import com.kogero.levelcounter.model.responses.SignUpResponse
+import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.http.*
 
@@ -28,4 +29,7 @@ interface ApiInterface {
 
     @GET("user/userlist")
     fun getAllUsers() : Call<List<UserListViewModel>>
+
+    @POST("relationship/connect")
+    fun makeRequest(@Query("userName") userName: String): Call<ResponseBody>
 }

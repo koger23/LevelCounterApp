@@ -9,7 +9,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.kogero.levelcounter.model.UserListViewModel
-import kotlinx.android.synthetic.main.friend_list_item.view.*
 import kotlinx.android.synthetic.main.friend_list_item.view.friendName
 import kotlinx.android.synthetic.main.user_list_item.view.*
 
@@ -24,12 +23,10 @@ class UsersAdapter(
     override fun onBindViewHolder(holder: FriendViewHolder, position: Int) {
         val selectedUser = userList[position]
         holder.friendName.text = selectedUser.userName
-        if (selectedUser.isFriend) {
-            holder.relationshipState.setImageResource(R.mipmap.friend)
-        } else if (selectedUser.isBlocked) {
-            holder.relationshipState.setImageResource(R.mipmap.block)
-        } else {
-            holder.relationshipState.setImageResource(R.mipmap.add_friend)
+        when {
+            selectedUser.isFriend -> holder.relationshipStateImgBtn.setImageResource(R.mipmap.friend)
+            selectedUser.isBlocked -> holder.relationshipStateImgBtn.setImageResource(R.mipmap.block)
+            else -> holder.relationshipStateImgBtn.setImageResource(R.mipmap.add_friend)
         }
         if (userFullList.size == 0) {
             userFullList.addAll(userList)
@@ -49,7 +46,7 @@ class UsersAdapter(
     }
 
     fun filterUsers(query: String): List<UserListViewModel> {
-        var query = query.toLowerCase()
+        val query = query.toLowerCase()
         userList.clear()
         for (user in userFullList) {
             if (user.userName.toLowerCase().contains(query)) {
@@ -65,7 +62,7 @@ class UsersAdapter(
 
     inner class FriendViewHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
         val friendName: TextView = view.friendName
-        val relationshipState: ImageButton = view.btnImg_relationship_state
+        val relationshipStateImgBtn: ImageButton = view.btnImg
 
         init {
             view.setOnClickListener(this)

@@ -4,10 +4,9 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.AdapterView
-import android.widget.SearchView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.kogero.levelcounter.model.RecyclerViewClickListener
@@ -17,15 +16,17 @@ import com.kogero.levelcounter.model.responses.UserShortResponse
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.io.IOException
 
 
-class UsersActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
+open class UsersActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
 
     override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
     }
 
     private var userList: ArrayList<UserListViewModel> = ArrayList()
     private var adapter = UsersAdapter(this, userList)
+    private var user: UserListViewModel? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,14 +37,27 @@ class UsersActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
         val recyclerView = findViewById<RecyclerView>(R.id.rv_user_list)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
+        recyclerView.addOnItemTouchListener(
+            RecyclerViewTouchListener(
+                applicationContext,
+                recyclerView,
+                object : RecyclerViewClickListener {
+                    override fun onClick(view: View, position: Int) {
+                        user = userList[position]
+                        if (user != null) {
+                            getStatisticsById(this@UsersActivity, user!!)
+                        }
+                    }
 
+                    override fun onLongClick(view: View, position: Int) {
+                    }
+                })
+        )
         val searchBar = findViewById<SearchView>(R.id.search_bar)
-        searchBar.setOnSearchClickListener {adapter.filterUsers(searchBar.query.toString())}
-
+        searchBar.setOnSearchClickListener { adapter.filterUsers(searchBar.query.toString()) }
         searchBar.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-
-            override fun onQueryTextChange(newText: String): Boolean {
-                adapter.filterUsers(newText)
+            override fun onQueryTextChange(query: String): Boolean {
+                adapter.filterUsers(query)
                 return false
             }
 
@@ -52,21 +66,6 @@ class UsersActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                 return false
             }
         })
-
-        recyclerView.addOnItemTouchListener(
-            RecyclerViewTouchListener(
-                applicationContext,
-                recyclerView,
-                object : RecyclerViewClickListener {
-                    override fun onClick(view: View, position: Int) {
-                        val user = userList[position]
-                        getStatisticsById(this@UsersActivity, user)
-                    }
-
-                    override fun onLongClick(view: View, position: Int) {
-                    }
-                })
-        )
         getAllUsers(this@UsersActivity)
     }
 
@@ -93,6 +92,8 @@ class UsersActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                         val intent = Intent(context, StatisticsActivity::class.java)
                         intent.putExtra("STATISTICS", statistics)
                         intent.putExtra("USERNAME", userShortResponse.userName)
+                        intent.putExtra("ISFRIEND", userShortResponse.isFriend)
+                        intent.putExtra("ISBLOCKED", userShortResponse.isBlocked)
                         startActivity(intent)
                     }
                 } else if (response.code() == 401) {
