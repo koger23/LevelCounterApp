@@ -2,11 +2,11 @@ package com.kogero.levelcounter.service
 
 import com.kogero.levelcounter.model.Statistics
 import com.kogero.levelcounter.model.UserListViewModel
-import com.kogero.levelcounter.model.responses.UserShortResponse
 import com.kogero.levelcounter.model.requests.LoginRequest
 import com.kogero.levelcounter.model.requests.SignUpRequest
 import com.kogero.levelcounter.model.responses.LoginResponse
 import com.kogero.levelcounter.model.responses.SignUpResponse
+import com.kogero.levelcounter.model.responses.UserShortResponse
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.http.*
@@ -25,11 +25,20 @@ interface ApiInterface {
     fun getFriends(): Call<List<UserShortResponse>>
 
     @GET("statistics/{id}")
-    fun getStatisticsById(@Path("id") id : Int): Call<Statistics>
+    fun getStatisticsById(@Path("id") id: Int): Call<Statistics>
 
     @GET("user/userlist")
-    fun getAllUsers() : Call<List<UserListViewModel>>
+    fun getAllUsers(): Call<List<UserListViewModel>>
 
     @POST("relationship/connect")
     fun makeRequest(@Query("userName") userName: String): Call<ResponseBody>
+
+    @POST("relationship/block")
+    fun blockUser(@Query("userName") userName: String): Call<ResponseBody>
+
+    @GET("user/requests/pending")
+    fun getPendingRequests(): Call<List<UserListViewModel>>
+
+    @POST("requests/{relationshipId}/confirm")
+    fun getPendingRequests(@Path("relationshipId") relationshipId: Int): Call<ResponseBody>
 }
