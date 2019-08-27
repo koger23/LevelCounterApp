@@ -48,13 +48,22 @@ class StatisticsActivity : AppCompatActivity() {
 
         val btnImage = findViewById<ImageView>(R.id.btnImgState)
         when {
-            isFriend -> btnImage.setImageResource(R.mipmap.friend)
-            isBlocked -> btnImage.setImageResource(R.mipmap.block)
+            isFriend -> {
+                btnImage.setImageResource(R.mipmap.block)
+                btnImage.setOnClickListener {
+                    blockUser(this@StatisticsActivity, userName!!)
+                }
+            }
+            isBlocked -> {
+                btnImage.setImageResource(R.mipmap.add_friend)
+                btnImage.setOnClickListener {
+                    makeRequest(this@StatisticsActivity, userName!!)
+                }
+            }
             else -> {
                 btnImage.setImageResource(R.mipmap.add_friend)
                 btnImage.setOnClickListener {
                     makeRequest(this@StatisticsActivity, userName!!)
-                    Toast.makeText(this@StatisticsActivity, "clicked", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -77,6 +86,33 @@ class StatisticsActivity : AppCompatActivity() {
                 Toast.makeText(
                     context,
                     "Request sent.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                Toast.makeText(
+                    context,
+                    "Could not connect to the server",
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
+            }
+        })
+    }
+
+    fun blockUser(
+        context: Context,
+        userName: String
+    ) {
+        val call: Call<ResponseBody> =
+            ApiClient.getClient.blockUser(userName)
+        call.enqueue(object : Callback<ResponseBody> {
+
+            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                Toast.makeText(
+                    context,
+                    "User blocked.",
                     Toast.LENGTH_SHORT
                 ).show()
             }
