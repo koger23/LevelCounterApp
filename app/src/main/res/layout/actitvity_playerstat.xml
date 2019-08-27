@@ -48,6 +48,8 @@
                     android:layout_height="50dp"
                     android:layout_marginEnd="15dp"
                     android:src="@mipmap/add_friend"
+                    android:scaleType="fitCenter"
+                    android:background="@null"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
