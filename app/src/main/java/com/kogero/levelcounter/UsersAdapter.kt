@@ -11,12 +11,12 @@ import com.kogero.levelcounter.model.responses.UserShortResponse
 import kotlinx.android.synthetic.main.friend_list_item.view.*
 
 
-class UserShortResponseAdapter(
+class UsersAdapter(
     private val context: Context,
     private val userList: ArrayList<UserShortResponse>,
     private val userFullList: ArrayList<UserShortResponse> = ArrayList()
 ) :
-    RecyclerView.Adapter<UserShortResponseAdapter.FriendViewHolder>() {
+    RecyclerView.Adapter<UsersAdapter.FriendViewHolder>() {
 
     override fun onBindViewHolder(holder: FriendViewHolder, position: Int) {
         holder.friendName.text = userList[position].userName
@@ -28,7 +28,7 @@ class UserShortResponseAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FriendViewHolder {
         return FriendViewHolder(
             LayoutInflater.from(context).inflate(
-                R.layout.friend_list_item, parent, false
+                R.layout.user_list_item, parent, false
             )
         )
     }

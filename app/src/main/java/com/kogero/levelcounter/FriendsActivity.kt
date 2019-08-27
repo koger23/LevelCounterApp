@@ -24,7 +24,7 @@ class FriendsActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
     }
 
     private val friendList: ArrayList<UserShortResponse> = ArrayList()
-    var adapter = UserShortResponseAdapter(this, friendList)
+    var adapter = FriendsAdapter(this, friendList)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

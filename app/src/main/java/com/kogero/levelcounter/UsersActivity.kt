@@ -24,7 +24,7 @@ class UsersActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
     }
 
     private var userList: ArrayList<UserShortResponse> = ArrayList()
-    private var adapter = UserShortResponseAdapter(this, userList)
+    private var adapter = UsersAdapter(this, userList)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
