@@ -2,17 +2,21 @@ package com.kogero.levelcounter
 
 import android.content.Context
 import android.content.Intent
+import android.media.Image
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.kogero.levelcounter.model.RecyclerViewClickListener
 import com.kogero.levelcounter.model.Statistics
+import com.kogero.levelcounter.model.UserListViewModel
 import com.kogero.levelcounter.model.responses.UserShortResponse
+import kotlinx.android.synthetic.main.actitvity_playerstat.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -22,6 +26,8 @@ class FriendsActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
 
     override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
     }
+
+    lateinit var pendingRequestsIcon: ImageButton
 
     private val friendList: ArrayList<UserShortResponse> = ArrayList()
     var adapter = FriendsAdapter(this, friendList)
@@ -58,6 +64,10 @@ class FriendsActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                     }
                 })
         )
+
+        pendingRequestsIcon = findViewById(R.id.imgBtnPending)
+        getPendingRequests(this@FriendsActivity)
+
     }
 
     private fun getFriends() {
@@ -72,8 +82,8 @@ class FriendsActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                 val userData: List<UserShortResponse>? = response.body()
                 if (response.code() == 200) {
                     if (userData != null) {
-                        for (userData in userData) {
-                            friendList.add(userData)
+                        for (udata in userData) {
+                            friendList.add(udata)
                         }
                         adapter.notifyDataSetChanged()
                     }
@@ -88,6 +98,51 @@ class FriendsActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
             override fun onFailure(call: Call<List<UserShortResponse>>, t: Throwable) {
                 Toast.makeText(
                     this@FriendsActivity,
+                    "Could not connect to the server",
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
+            }
+        })
+    }
+
+    private fun getPendingRequests(
+        context: Context
+    ){
+        val call: Call<List<UserListViewModel>> =
+            ApiClient.getClient.getPendingRequests()
+        call.enqueue(object : Callback<List<UserListViewModel>> {
+            override fun onResponse(
+                call: Call<List<UserListViewModel>>,
+                response: Response<List<UserListViewModel>>
+            ) {
+                Toast.makeText(
+                    context,
+                    "Code: " + response.code(),
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
+                val pendingRequests: List<UserListViewModel>? = response.body()
+                if (response.code() == 200) {
+                    if (pendingRequests != null && pendingRequests.isNotEmpty()) {
+                        pendingRequestsIcon.visibility = View.VISIBLE
+                        pendingRequestsIcon.setOnClickListener {
+                            val intent = Intent(this@FriendsActivity, PendingRequestActivity::class.java)
+                            startActivity(intent)
+                        }
+                    } else {
+                        pendingRequestsIcon.visibility = View.INVISIBLE
+                    }
+                } else if (response.code() == 401) {
+                    Toast.makeText(context, "Login expired.", Toast.LENGTH_SHORT).show()
+                    val intent = Intent(context, MainActivity::class.java)
+                    startActivity(intent)
+                }
+            }
+
+            override fun onFailure(call: Call<List<UserListViewModel>>, t: Throwable) {
+                Toast.makeText(
+                    context,
                     "Could not connect to the server",
                     Toast.LENGTH_SHORT
                 )
