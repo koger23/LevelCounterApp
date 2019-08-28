@@ -42,16 +42,18 @@ class PendingRequestActivity : AppCompatActivity(), AdapterView.OnItemClickListe
                 object : RecyclerViewClickListener {
                     override fun onClick(view: View, position: Int) {
                         btnImgOk.setOnClickListener {
-                            Toast.makeText(this@PendingRequestActivity, "OK!", Toast.LENGTH_SHORT)
-                                .show()
-                            confirmRequests(this@PendingRequestActivity, userList[position].relationShipId, position)
+                            confirmRequests(
+                                this@PendingRequestActivity,
+                                userList[position].relationShipId,
+                                position
+                            )
                         }
                         btnImgDismiss.setOnClickListener {
-                            Toast.makeText(
+                            dismissRequest(
                                 this@PendingRequestActivity,
-                                "Not OK!",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                                userList[position].relationShipId,
+                                position
+                            )
                         }
                     }
 
@@ -59,8 +61,44 @@ class PendingRequestActivity : AppCompatActivity(), AdapterView.OnItemClickListe
                     }
                 })
         )
-
         getPendingRequests(this@PendingRequestActivity)
+    }
+
+    private fun dismissRequest(context: Context, relationshipId: Int, position: Int) {
+        val call: Call<ResponseBody> =
+            ApiClient.getClient.dismissRequest(relationshipId)
+        call.enqueue(object : Callback<ResponseBody> {
+            override fun onResponse(
+                call: Call<ResponseBody>,
+                response: Response<ResponseBody>
+            ) {
+                Toast.makeText(
+                    context,
+                    "Code: " + response.code(),
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
+
+                if (response.code() == 200) {
+                    userList.remove(userList[position])
+                    adapter.notifyItemRemoved(position)
+
+                } else if (response.code() == 401) {
+                    Toast.makeText(context, "Login expired.", Toast.LENGTH_SHORT).show()
+                    val intent = Intent(context, MainActivity::class.java)
+                    startActivity(intent)
+                }
+            }
+
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                Toast.makeText(
+                    context,
+                    "Could not connect to the server",
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
+            }
+        })
     }
 
     private fun confirmRequests(

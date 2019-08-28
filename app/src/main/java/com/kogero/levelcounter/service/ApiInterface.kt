@@ -40,4 +40,7 @@ interface ApiInterface {
 
     @PUT("user/requests/{relationshipId}/confirm")
     fun confirmRequest(@Path("relationshipId") relationshipId: Int): Call<ResponseBody>
+
+    @PUT("user/requests/{relationshipId}/dismiss")
+    fun dismissRequest(@Path("relationshipId") relationshipId: Int): Call<ResponseBody>
 }
