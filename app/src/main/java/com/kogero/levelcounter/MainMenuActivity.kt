@@ -11,9 +11,12 @@ import kotlin.system.exitProcess
 class MainMenuActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
-        actionBar?.hide()
         setContentView(R.layout.activity_mainmenu)
+
+        val btnStat = findViewById<Button>(R.id.btnMyStats)
+        btnStat.setOnClickListener {
+            val intent = Intent(this, PersonalStatisticsActivity::class.java)
+            startActivity(intent)}
 
         val btnFriends = findViewById<Button>(R.id.btnFriends)
         btnFriends.setOnClickListener {
@@ -23,19 +26,11 @@ class MainMenuActivity : AppCompatActivity() {
         btnQuit.setOnClickListener {quitMsg()}
     }
 
-    override fun onResume() {
-        super.onResume()
-        window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
-        actionBar?.hide()
-    }
-
     override fun onBackPressed() {
         quitMsg()
     }
 
     private fun quitMsg() {
-        window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
-        actionBar?.hide()
         AlertDialog.Builder(this)
             .setIcon(android.R.drawable.ic_dialog_alert)
             .setTitle("Quit")

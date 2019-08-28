@@ -27,8 +27,6 @@ class PendingRequestActivity : AppCompatActivity(), AdapterView.OnItemClickListe
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
-        actionBar?.hide()
         setContentView(R.layout.activity_pending_requests)
 
         val recyclerView = findViewById<RecyclerView>(R.id.rv_user_list)

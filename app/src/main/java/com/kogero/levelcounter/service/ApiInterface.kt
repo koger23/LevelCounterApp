@@ -43,4 +43,7 @@ interface ApiInterface {
 
     @PUT("user/requests/{relationshipId}/dismiss")
     fun dismissRequest(@Path("relationshipId") relationshipId: Int): Call<ResponseBody>
+
+    @GET("statistics/userstats")
+    fun getPersonalStats(): Call<Statistics>
 }
