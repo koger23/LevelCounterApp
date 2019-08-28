@@ -7,14 +7,15 @@ import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import com.kogero.levelcounter.model.UserListViewModel
 import com.kogero.levelcounter.model.responses.UserShortResponse
 import kotlinx.android.synthetic.main.friend_list_item.view.*
 
 
 class FriendsAdapter(
     private val context: Context,
-    private val userList: ArrayList<UserShortResponse>,
-    private val userFullList: ArrayList<UserShortResponse> = ArrayList()
+    private val userList: ArrayList<UserListViewModel>,
+    private val userFullList: ArrayList<UserListViewModel> = ArrayList()
 ) :
     RecyclerView.Adapter<FriendsAdapter.FriendViewHolder>() {
 
@@ -37,12 +38,12 @@ class FriendsAdapter(
         return userList.size
     }
 
-    fun filterUsers(query: String): List<UserShortResponse> {
+    fun filterUsers(query: String): List<UserListViewModel> {
         var query = query.toLowerCase()
         userList.clear()
-        for (user in userFullList) {
-            if (user.userName.toLowerCase().contains(query)) {
-                userList.add(user)
+        for (user1 in userFullList) {
+            if (user1.userName?.toLowerCase()!!.contains(query)) {
+                userList.add(user1)
             }
         }
         if (userList.isEmpty()) {

@@ -6,7 +6,6 @@ import com.kogero.levelcounter.model.requests.LoginRequest
 import com.kogero.levelcounter.model.requests.SignUpRequest
 import com.kogero.levelcounter.model.responses.LoginResponse
 import com.kogero.levelcounter.model.responses.SignUpResponse
-import com.kogero.levelcounter.model.responses.UserShortResponse
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.http.*
@@ -22,7 +21,7 @@ interface ApiInterface {
     fun signUp(@Body signUpRequest: SignUpRequest): Call<SignUpResponse>
 
     @GET("user/friends")
-    fun getFriends(): Call<List<UserShortResponse>>
+    fun getFriends(): Call<List<UserListViewModel>>
 
     @GET("statistics/{id}")
     fun getStatisticsById(@Path("id") id: Int): Call<Statistics>
@@ -39,6 +38,6 @@ interface ApiInterface {
     @GET("user/requests/pending")
     fun getPendingRequests(): Call<List<UserListViewModel>>
 
-    @POST("requests/{relationshipId}/confirm")
-    fun getPendingRequests(@Path("relationshipId") relationshipId: Int): Call<ResponseBody>
+    @PUT("user/requests/{relationshipId}/confirm")
+    fun confirmRequest(@Path("relationshipId") relationshipId: Int): Call<ResponseBody>
 }

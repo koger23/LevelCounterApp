@@ -29,8 +29,22 @@ class FriendsActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
 
     lateinit var pendingRequestsIcon: ImageButton
 
-    private val friendList: ArrayList<UserShortResponse> = ArrayList()
+    private val friendList: ArrayList<UserListViewModel> = ArrayList()
     var adapter = FriendsAdapter(this, friendList)
+
+    override fun onResume() {
+        super.onResume()
+        getFriends()
+        getPendingRequests(this@FriendsActivity)
+        adapter.notifyDataSetChanged()
+    }
+
+    override fun onRestart() {
+        super.onRestart()
+        getFriends()
+        getPendingRequests(this@FriendsActivity)
+        adapter.notifyDataSetChanged()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,7 +61,7 @@ class FriendsActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
         getFriends()
 
         val recyclerView = findViewById<RecyclerView>(R.id.rv_friend_list)
-        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.layoutManager = LinearLayoutManager(this@FriendsActivity)
         recyclerView.adapter = adapter
 
         recyclerView.addOnItemTouchListener(
@@ -71,17 +85,18 @@ class FriendsActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
     }
 
     private fun getFriends() {
-        val call: Call<List<UserShortResponse>> = ApiClient.getClient.getFriends()
-        call.enqueue(object : Callback<List<UserShortResponse>> {
+        val call: Call<List<UserListViewModel>> = ApiClient.getClient.getFriends()
+        call.enqueue(object : Callback<List<UserListViewModel>> {
             override fun onResponse(
-                call: Call<List<UserShortResponse>>,
-                response: Response<List<UserShortResponse>>
+                call: Call<List<UserListViewModel>>,
+                response: Response<List<UserListViewModel>>
             ) {
                 Toast.makeText(this@FriendsActivity, "Code: " + response.code(), Toast.LENGTH_SHORT)
                     .show()
-                val userData: List<UserShortResponse>? = response.body()
+                val userData: List<UserListViewModel>? = response.body()
                 if (response.code() == 200) {
                     if (userData != null) {
+                        friendList.clear()
                         for (udata in userData) {
                             friendList.add(udata)
                         }
@@ -95,7 +110,7 @@ class FriendsActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                 }
             }
 
-            override fun onFailure(call: Call<List<UserShortResponse>>, t: Throwable) {
+            override fun onFailure(call: Call<List<UserListViewModel>>, t: Throwable) {
                 Toast.makeText(
                     this@FriendsActivity,
                     "Could not connect to the server",
@@ -153,7 +168,7 @@ class FriendsActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
 
     private fun getStatisticsById(
         context: Context,
-        userShortResponse: UserShortResponse
+        userShortResponse: UserListViewModel
     ) {
         val call: Call<Statistics> =
             ApiClient.getClient.getStatisticsById(userShortResponse.statisticsId)
@@ -173,6 +188,9 @@ class FriendsActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                     if (statistics != null) {
                         val intent = Intent(context, StatisticsActivity::class.java)
                         intent.putExtra("STATISTICS", statistics)
+                        intent.putExtra("ISPENDING", userShortResponse.isPending)
+                        intent.putExtra("ISBLOCKED", userShortResponse.isBlocked)
+                        intent.putExtra("ISFRIEND", userShortResponse.isFriend)
                         intent.putExtra("USERNAME", userShortResponse.userName)
                         startActivity(intent)
                     }

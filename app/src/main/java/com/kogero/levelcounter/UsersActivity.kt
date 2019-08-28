@@ -28,6 +28,18 @@ open class UsersActivity : AppCompatActivity(), AdapterView.OnItemClickListener 
     private var adapter = UsersAdapter(this, userList)
     private var user: UserListViewModel? = null
 
+    override fun onResume() {
+        super.onResume()
+        getAllUsers(this@UsersActivity)
+        adapter.notifyDataSetChanged()
+    }
+
+    override fun onRestart() {
+        super.onRestart()
+        getAllUsers(this@UsersActivity)
+        adapter.notifyDataSetChanged()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
@@ -94,6 +106,7 @@ open class UsersActivity : AppCompatActivity(), AdapterView.OnItemClickListener 
                         intent.putExtra("USERNAME", userShortResponse.userName)
                         intent.putExtra("ISFRIEND", userShortResponse.isFriend)
                         intent.putExtra("ISBLOCKED", userShortResponse.isBlocked)
+                        intent.putExtra("ISPENDING", userShortResponse.isPending)
                         startActivity(intent)
                     }
                 } else if (response.code() == 401) {
@@ -134,6 +147,7 @@ open class UsersActivity : AppCompatActivity(), AdapterView.OnItemClickListener 
                 if (response.code() == 200) {
                     if (userResponseList != null) {
                         for (user in userResponseList) {
+                            userList.clear()
                             userList.add(user)
                         }
                         adapter.notifyDataSetChanged()

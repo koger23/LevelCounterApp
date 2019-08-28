@@ -6,5 +6,6 @@ class UserListViewModel(
     val avatarUrl: String,
     val isFriend: Boolean,
     val isBlocked: Boolean,
+    val isPending: Boolean,
     val relationShipId: Int
 )

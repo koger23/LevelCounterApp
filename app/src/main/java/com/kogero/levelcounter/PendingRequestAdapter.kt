@@ -50,7 +50,6 @@ class PendingRequestAdapter(
         }
 
         override fun onClick(v: View) {
-            Toast.makeText(v.context, "View pressed", Toast.LENGTH_SHORT).show()
         }
     }
 }

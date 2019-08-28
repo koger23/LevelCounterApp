@@ -1,7 +1,6 @@
 package com.kogero.levelcounter
 
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
@@ -13,7 +12,6 @@ import retrofit2.Call
 import retrofit2.Callback
 import okhttp3.ResponseBody
 import retrofit2.Response
-import java.io.IOException
 
 
 class StatisticsActivity : AppCompatActivity() {
@@ -45,6 +43,7 @@ class StatisticsActivity : AppCompatActivity() {
         val relationshipId = intent.extras.getInt("RELATIONSHIPID")
         val isFriend = intent.extras.getBoolean("ISFRIEND")
         val isBlocked = intent.extras.getBoolean("ISBLOCKED")
+        val isPending = intent.extras.getBoolean("ISPENDING")
 
         val btnImage = findViewById<ImageView>(R.id.btnImgState)
         when {
@@ -57,13 +56,16 @@ class StatisticsActivity : AppCompatActivity() {
             isBlocked -> {
                 btnImage.setImageResource(R.mipmap.add_friend)
                 btnImage.setOnClickListener {
-                    makeRequest(this@StatisticsActivity, userName!!)
+                    makeRequest(this@StatisticsActivity, userName!!, btnImage)
                 }
+            }
+            isPending -> {
+                btnImage.setImageResource(R.mipmap.mailsent)
             }
             else -> {
                 btnImage.setImageResource(R.mipmap.add_friend)
                 btnImage.setOnClickListener {
-                    makeRequest(this@StatisticsActivity, userName!!)
+                    makeRequest(this@StatisticsActivity, userName!!, btnImage)
                 }
             }
         }
@@ -74,9 +76,10 @@ class StatisticsActivity : AppCompatActivity() {
         fun newInstance(): FriendsActivity = FriendsActivity()
     }
 
-    fun makeRequest(
+    private fun makeRequest(
         context: Context,
-        userName: String
+        userName: String,
+        btnImage: ImageView
     ) {
         val call: Call<ResponseBody> =
             ApiClient.getClient.makeRequest(userName)
@@ -88,6 +91,7 @@ class StatisticsActivity : AppCompatActivity() {
                     "Request sent.",
                     Toast.LENGTH_SHORT
                 ).show()
+                btnImage.setImageResource(R.mipmap.mailsent)
             }
 
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
@@ -101,7 +105,7 @@ class StatisticsActivity : AppCompatActivity() {
         })
     }
 
-    fun blockUser(
+    private fun blockUser(
         context: Context,
         userName: String
     ) {

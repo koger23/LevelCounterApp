@@ -26,6 +26,7 @@ class UsersAdapter(
         when {
             selectedUser.isFriend -> holder.relationshipStateImgBtn.setImageResource(R.mipmap.friend)
             selectedUser.isBlocked -> holder.relationshipStateImgBtn.setImageResource(R.mipmap.block)
+            selectedUser.isPending -> holder.relationshipStateImgBtn.setImageResource(R.mipmap.mailsent)
             else -> holder.relationshipStateImgBtn.setImageResource(R.mipmap.add_friend)
         }
         if (userFullList.size == 0) {
