@@ -76,10 +76,8 @@ class FriendsActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                     }
                 })
         )
-
         pendingRequestsIcon = findViewById(R.id.imgBtnPending)
         getPendingRequests(this@FriendsActivity)
-
     }
 
     private fun getFriends() {

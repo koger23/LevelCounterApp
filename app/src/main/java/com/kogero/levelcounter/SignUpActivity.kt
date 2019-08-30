@@ -37,12 +37,6 @@ class SignUpActivity : AppCompatActivity() {
             }
 
             if (checkInputs(username, fullName, email, password, verifyPassword)) {
-                Toast.makeText(
-                    this@SignUpActivity,
-                    "Signing up... $gender",
-                    Toast.LENGTH_SHORT
-                ).show()
-
                 val signUpRequest = SignUpRequest(
                     fullName = fullName,
                     userName = username,
@@ -63,8 +57,6 @@ class SignUpActivity : AppCompatActivity() {
                 call: Call<SignUpResponse>,
                 response: Response<SignUpResponse>
             ) {
-                Toast.makeText(this@SignUpActivity, "Code: " + response.code(), Toast.LENGTH_SHORT)
-                    .show()
                 if (response.code() == 200) {
                     Toast.makeText(
                         this@SignUpActivity,
@@ -72,7 +64,7 @@ class SignUpActivity : AppCompatActivity() {
                         Toast.LENGTH_SHORT
                     )
                         .show()
-                    finish()
+                    this@SignUpActivity.finish()
                 }
             }
 

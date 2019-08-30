@@ -8,7 +8,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.kogero.levelcounter.model.UserListViewModel
-import com.kogero.levelcounter.model.responses.UserShortResponse
 import kotlinx.android.synthetic.main.friend_list_item.view.*
 
 

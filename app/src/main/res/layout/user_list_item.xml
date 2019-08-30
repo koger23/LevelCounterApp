@@ -29,7 +29,7 @@
         <TextView
             android:id="@+id/friendName"
             android:layout_width="0dp"
-            android:layout_height="101dp"
+            android:layout_height="100dp"
             android:gravity="center"
             android:paddingLeft="20dp"
             android:text="UserNameHere"

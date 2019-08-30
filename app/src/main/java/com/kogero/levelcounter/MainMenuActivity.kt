@@ -12,11 +12,14 @@ class MainMenuActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_mainmenu)
 
-        val btnNewGame = findViewById<Button>(R.id.btnProfile)
+        val btnNewGame = findViewById<Button>(R.id.btnNewGame)
+        btnNewGame.setOnClickListener {
+            val intent = Intent(this, NewGameSelectionActivity::class.java)
+            startActivity(intent)}
 
-        val btnJoinGame = findViewById<Button>(R.id.btnProfile)
+        val btnJoinGame = findViewById<Button>(R.id.btnJoinGame)
 
-        val btnLoadGame = findViewById<Button>(R.id.btnProfile)
+        val btnLoadGame = findViewById<Button>(R.id.btnLoadGame)
 
         val btnStat = findViewById<Button>(R.id.btnMyStats)
         btnStat.setOnClickListener {
@@ -30,7 +33,7 @@ class MainMenuActivity : AppCompatActivity() {
             val intent = Intent(this, FriendsActivity::class.java)
             startActivity(intent)}
 
-        val btnAbout = findViewById<Button>(R.id.btnProfile)
+        val btnAbout = findViewById<Button>(R.id.btnAbout)
 
         val btnQuit = findViewById<Button>(R.id.btnQuit)
         btnQuit.setOnClickListener {quitMsg()}
