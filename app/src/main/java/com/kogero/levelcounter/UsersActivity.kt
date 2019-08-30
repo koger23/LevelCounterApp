@@ -144,8 +144,8 @@ open class UsersActivity : AppCompatActivity(), AdapterView.OnItemClickListener 
                 val userResponseList: List<UserListViewModel>? = response.body()
                 if (response.code() == 200) {
                     if (userResponseList != null) {
+                        userList.clear()
                         for (user in userResponseList) {
-                            userList.clear()
                             userList.add(user)
                         }
                         adapter.notifyDataSetChanged()

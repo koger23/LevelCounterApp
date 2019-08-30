@@ -3,14 +3,16 @@ package com.kogero.levelcounter
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.CheckBox
+import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.kogero.levelcounter.model.Game
 import com.kogero.levelcounter.model.RecyclerViewClickListener
 import com.kogero.levelcounter.model.UserListViewModel
 import com.kogero.levelcounter.model.UserSelectionModel
+import com.kogero.levelcounter.model.requests.InGameUserCreationRequest
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -36,7 +38,6 @@ class NewGameSelectionActivity : AppCompatActivity() {
         recyclerView.adapter = adapter
         getFriends()
 
-        val checkBox = findViewById<CheckBox>(R.id.cbSelection)
         recyclerView.addOnItemTouchListener(
             RecyclerViewTouchListener(
                 applicationContext,
@@ -45,13 +46,124 @@ class NewGameSelectionActivity : AppCompatActivity() {
                     override fun onClick(view: View, position: Int) {
                         val userModel = viewModels[position]
                         userModel.isSelected = !userModel.isSelected
-                        Toast.makeText(this@NewGameSelectionActivity, "${userModel.isSelected}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@NewGameSelectionActivity, "${userModel.user.userName} clicked to ${userModel.isSelected}", Toast.LENGTH_SHORT).show()
                     }
 
                     override fun onLongClick(view: View, position: Int) {
                     }
                 })
         )
+        val btnStartGame = findViewById<Button>(R.id.btnStartGame)
+        btnStartGame.setOnClickListener {
+            createGame()
+        }
+    }
+
+    private fun startGame(gameId: Int) {
+        val call: Call<Game> = ApiClient.getClient.startGame(gameId)
+        call.enqueue(object : Callback<Game> {
+            override fun onResponse(
+                call: Call<Game>,
+                response: Response<Game>
+            ) {
+                val game: Game? = response.body()
+                if (response.code() == 200) {
+                    val gameId = game?.id
+                    Toast.makeText(this@NewGameSelectionActivity, "Game can be started. Id: $gameId", Toast.LENGTH_SHORT)
+                        .show()
+                } else {
+                    Toast.makeText(this@NewGameSelectionActivity, "Error Code: " + response.code(), Toast.LENGTH_LONG)
+                        .show()
+                }
+            }
+
+            override fun onFailure(call: Call<Game>, t: Throwable) {
+                Toast.makeText(
+                    this@NewGameSelectionActivity,
+                    "Could not connect to the server",
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
+            }
+        })
+    }
+
+    private fun createGame() {
+        val call: Call<Game> = ApiClient.getClient.createGame()
+        call.enqueue(object : Callback<Game> {
+            override fun onResponse(
+                call: Call<Game>,
+                response: Response<Game>
+            ) {
+                val game: Game? = response.body()
+                if (response.code() == 200) {
+                    if (game != null) {
+                        addInGameUsers(game.id)
+                    } else {
+                        Toast.makeText(this@NewGameSelectionActivity, "Game with not exists" + response.code(), Toast.LENGTH_LONG)
+                            .show()
+                    }
+                } else {
+                    Toast.makeText(this@NewGameSelectionActivity, "Error when creating game: ${response.code()}", Toast.LENGTH_LONG)
+                        .show()
+                }
+            }
+
+            override fun onFailure(call: Call<Game>, t: Throwable) {
+                Toast.makeText(
+                    this@NewGameSelectionActivity,
+                    "Could not connect to the server",
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
+            }
+        })
+    }
+
+    private fun addInGameUsers(gameId: Int) {
+        val call: Call<Game> = ApiClient.getClient.addInGameUsers(createInGameRequest(gameId))
+        call.enqueue(object : Callback<Game> {
+            override fun onResponse(
+                call: Call<Game>,
+                response: Response<Game>
+            ) {
+                val game: Game? = response.body()
+                if (response.code() == 200) {
+                    if (game != null) {
+                        startGame(game.id)
+                    } else {
+                        Toast.makeText(this@NewGameSelectionActivity, "Game with not exists" + response.code(), Toast.LENGTH_LONG)
+                            .show()
+                    }
+                } else {
+                    Toast.makeText(this@NewGameSelectionActivity, "Error Code: " + response.code(), Toast.LENGTH_LONG)
+                        .show()
+                }
+            }
+
+            override fun onFailure(call: Call<Game>, t: Throwable) {
+                Toast.makeText(
+                    this@NewGameSelectionActivity,
+                    "Could not connect to the server",
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
+            }
+        })
+    }
+
+    private fun createInGameRequest(gameId: Int): InGameUserCreationRequest {
+        return InGameUserCreationRequest(gameId, getSelectedPlayerNames())
+    }
+
+    private fun getSelectedPlayerNames(): ArrayList<String> {
+        val selectedPlayerNames = ArrayList<String>()
+        for (playerName in viewModels) {
+            if (playerName.isSelected) {
+                selectedPlayerNames.add(playerName.user.userName)
+            }
+        }
+        return selectedPlayerNames
     }
 
     private fun getFriends() {
@@ -61,8 +173,6 @@ class NewGameSelectionActivity : AppCompatActivity() {
                 call: Call<List<UserListViewModel>>,
                 response: Response<List<UserListViewModel>>
             ) {
-                Toast.makeText(this@NewGameSelectionActivity, "Code: " + response.code(), Toast.LENGTH_SHORT)
-                    .show()
                 val userData: List<UserListViewModel>? = response.body()
                 if (response.code() == 200) {
                     if (userData != null) {
@@ -80,6 +190,9 @@ class NewGameSelectionActivity : AppCompatActivity() {
                         .show()
                     val intent = Intent(this@NewGameSelectionActivity, MainActivity::class.java)
                     startActivity(intent)
+                } else {
+                    Toast.makeText(this@NewGameSelectionActivity, "Error Code: " + response.code(), Toast.LENGTH_LONG)
+                        .show()
                 }
             }
 

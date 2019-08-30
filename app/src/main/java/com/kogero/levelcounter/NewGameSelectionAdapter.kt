@@ -61,7 +61,6 @@ class NewGameSelectionAdapter(
 
         init {
             view.setOnClickListener(this)
-            checkBox.setOnClickListener(this)
             this.setIsRecyclable(false)
         }
         override fun onClick(v: View) {

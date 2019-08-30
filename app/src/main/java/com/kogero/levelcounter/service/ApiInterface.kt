@@ -1,7 +1,10 @@
 package com.kogero.levelcounter.service
 
+import com.kogero.levelcounter.model.Game
+import com.kogero.levelcounter.model.InGameUser
 import com.kogero.levelcounter.model.Statistics
 import com.kogero.levelcounter.model.UserListViewModel
+import com.kogero.levelcounter.model.requests.InGameUserCreationRequest
 import com.kogero.levelcounter.model.requests.LoginRequest
 import com.kogero.levelcounter.model.requests.SignUpRequest
 import com.kogero.levelcounter.model.responses.LoginResponse
@@ -46,4 +49,31 @@ interface ApiInterface {
 
     @GET("statistics/userstats")
     fun getPersonalStats(): Call<Statistics>
+
+    @POST("game/create")
+    fun createGame(): Call<Game>
+
+    @POST("game/addInGameUsers")
+    fun addInGameUsers(@Body inGameUserCreationRequest: InGameUserCreationRequest): Call<Game>
+
+    @POST("game/startGame")
+    fun startGame(@Query("gameId") gameId: Int): Call<Game>
+
+    @POST("game/updateInGameUser")
+    fun updateInGameUser(inGameUser: InGameUser): Call<ResponseBody>
+
+    @GET("game/loadGame")
+    fun loadGame(@Query("gameId") gameId: Int): Call<Game>
+
+    @POST("game/quitGame")
+    fun quitGame(@Query("gameId") gameId: Int): Call<Game>
+
+    @DELETE("game/delete")
+    fun deleteGame(@Query("gameId") gameId: Int): Call<ResponseBody>
+
+    @GET("game/savedGames")
+    fun getSavedGames(): Call<List<Game>>
+
+    @GET("game/joinableGames")
+    fun getJoinableGames(): Call<List<Game>>
 }
