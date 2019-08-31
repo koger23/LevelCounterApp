@@ -1,9 +1,11 @@
 package com.kogero.levelcounter
 
 import android.content.Intent
+import android.graphics.LightingColorFilter
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -38,6 +40,9 @@ class NewGameSelectionActivity : AppCompatActivity() {
         recyclerView.adapter = adapter
         getFriends()
 
+        var progressBar = findViewById<ProgressBar>(R.id.pbGameStart)
+        progressBar.visibility = View.INVISIBLE
+
         recyclerView.addOnItemTouchListener(
             RecyclerViewTouchListener(
                 applicationContext,
@@ -46,7 +51,6 @@ class NewGameSelectionActivity : AppCompatActivity() {
                     override fun onClick(view: View, position: Int) {
                         val userModel = viewModels[position]
                         userModel.isSelected = !userModel.isSelected
-                        Toast.makeText(this@NewGameSelectionActivity, "${userModel.user.userName} clicked to ${userModel.isSelected}", Toast.LENGTH_SHORT).show()
                     }
 
                     override fun onLongClick(view: View, position: Int) {
@@ -55,6 +59,7 @@ class NewGameSelectionActivity : AppCompatActivity() {
         )
         val btnStartGame = findViewById<Button>(R.id.btnStartGame)
         btnStartGame.setOnClickListener {
+            progressBar.visibility = View.VISIBLE
             createGame()
         }
     }
@@ -69,10 +74,12 @@ class NewGameSelectionActivity : AppCompatActivity() {
                 val game: Game? = response.body()
                 if (response.code() == 200) {
                     val gameId = game?.id
-                    Toast.makeText(this@NewGameSelectionActivity, "Game can be started. Id: $gameId", Toast.LENGTH_SHORT)
-                        .show()
+                    val intent = Intent(this@NewGameSelectionActivity, GameActivity::class.java)
+                    intent.putExtra("GAME", game)
+                    startActivity(intent)
+
                 } else {
-                    Toast.makeText(this@NewGameSelectionActivity, "Error Code: " + response.code(), Toast.LENGTH_LONG)
+                    Toast.makeText(this@NewGameSelectionActivity, "Error while starting the game: " + response.code(), Toast.LENGTH_LONG)
                         .show()
                 }
             }
@@ -98,6 +105,8 @@ class NewGameSelectionActivity : AppCompatActivity() {
                 val game: Game? = response.body()
                 if (response.code() == 200) {
                     if (game != null) {
+                        Toast.makeText(this@NewGameSelectionActivity, "Time:" + game.dateTime, Toast.LENGTH_LONG)
+                            .show()
                         addInGameUsers(game.id)
                     } else {
                         Toast.makeText(this@NewGameSelectionActivity, "Game with not exists" + response.code(), Toast.LENGTH_LONG)
@@ -136,7 +145,7 @@ class NewGameSelectionActivity : AppCompatActivity() {
                             .show()
                     }
                 } else {
-                    Toast.makeText(this@NewGameSelectionActivity, "Error Code: " + response.code(), Toast.LENGTH_LONG)
+                    Toast.makeText(this@NewGameSelectionActivity, "Error while adding players: " + response.code(), Toast.LENGTH_LONG)
                         .show()
                 }
             }
@@ -191,7 +200,7 @@ class NewGameSelectionActivity : AppCompatActivity() {
                     val intent = Intent(this@NewGameSelectionActivity, MainActivity::class.java)
                     startActivity(intent)
                 } else {
-                    Toast.makeText(this@NewGameSelectionActivity, "Error Code: " + response.code(), Toast.LENGTH_LONG)
+                    Toast.makeText(this@NewGameSelectionActivity, "Error while getting friends: " + response.code(), Toast.LENGTH_LONG)
                         .show()
                 }
             }
