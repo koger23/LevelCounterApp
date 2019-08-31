@@ -19,7 +19,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerView"
+        android:id="@+id/rv_playerlist"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="16dp"
@@ -56,8 +56,8 @@
 
             <ImageButton
                 android:id="@+id/btnLevelPlus"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:layout_weight="0"
                 android:background="@color/munchkinYellow"
                 android:scaleType="centerInside"
@@ -75,7 +75,7 @@
             <ImageButton
                 android:id="@+id/btnLevelMin"
                 android:layout_width="50dp"
-                android:layout_height="50dp"
+                android:layout_height="48dp"
                 android:layout_weight="0"
                 android:background="@color/munchkinYellow"
                 android:scaleType="centerInside"
@@ -93,7 +93,7 @@
             <ImageButton
                 android:id="@+id/btnBonusPlus"
                 android:layout_width="50dp"
-                android:layout_height="50dp"
+                android:layout_height="48dp"
                 android:layout_weight="0"
                 android:background="@color/munchkinYellow"
                 android:scaleType="centerInside"
@@ -110,7 +110,7 @@
 
             <ImageButton
                 android:id="@+id/btnBonusMin"
-                android:layout_width="50dp"
+                android:layout_width="48dp"
                 android:layout_height="50dp"
                 android:layout_weight="0"
                 android:background="@color/munchkinYellow"

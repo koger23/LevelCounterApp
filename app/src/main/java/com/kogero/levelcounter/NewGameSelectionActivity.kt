@@ -1,7 +1,6 @@
 package com.kogero.levelcounter
 
 import android.content.Intent
-import android.graphics.LightingColorFilter
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -27,6 +26,12 @@ class NewGameSelectionActivity : AppCompatActivity() {
 
     override fun onRestart() {
         super.onRestart()
+        getFriends()
+        adapter.notifyDataSetChanged()
+    }
+
+    override fun onResume() {
+        super.onResume()
         getFriends()
         adapter.notifyDataSetChanged()
     }
@@ -75,7 +80,7 @@ class NewGameSelectionActivity : AppCompatActivity() {
                 if (response.code() == 200) {
                     val gameId = game?.id
                     val intent = Intent(this@NewGameSelectionActivity, GameActivity::class.java)
-                    intent.putExtra("GAME", game)
+                    intent.putExtra("GAMEID", game?.id)
                     startActivity(intent)
 
                 } else {
@@ -87,7 +92,7 @@ class NewGameSelectionActivity : AppCompatActivity() {
             override fun onFailure(call: Call<Game>, t: Throwable) {
                 Toast.makeText(
                     this@NewGameSelectionActivity,
-                    "Could not connect to the server",
+                    "Could not connect to the server when trying start the game",
                     Toast.LENGTH_SHORT
                 )
                     .show()
@@ -121,7 +126,7 @@ class NewGameSelectionActivity : AppCompatActivity() {
             override fun onFailure(call: Call<Game>, t: Throwable) {
                 Toast.makeText(
                     this@NewGameSelectionActivity,
-                    "Could not connect to the server",
+                    "Could not connect to the server when try create game",
                     Toast.LENGTH_SHORT
                 )
                     .show()
@@ -153,7 +158,7 @@ class NewGameSelectionActivity : AppCompatActivity() {
             override fun onFailure(call: Call<Game>, t: Throwable) {
                 Toast.makeText(
                     this@NewGameSelectionActivity,
-                    "Could not connect to the server",
+                    "Could not connect to the server when try to add players",
                     Toast.LENGTH_SHORT
                 )
                     .show()
@@ -208,7 +213,7 @@ class NewGameSelectionActivity : AppCompatActivity() {
             override fun onFailure(call: Call<List<UserListViewModel>>, t: Throwable) {
                 Toast.makeText(
                     this@NewGameSelectionActivity,
-                    "Could not connect to the server",
+                    "Could not connect to the server while getting friend list",
                     Toast.LENGTH_SHORT
                 )
                     .show()
