@@ -64,9 +64,7 @@ class GameActivity : AppCompatActivity() {
                 recyclerView,
                 object : RecyclerViewClickListener {
                     override fun onClick(view: View, position: Int) {
-                        if (checkUserIsHost()) {
-                            adapter.selectedPosition = position
-                        }
+                        adapter.selectedPosition = position
                     }
 
                     override fun onLongClick(view: View, position: Int) {
@@ -106,35 +104,35 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun checkUserIsHost(): Boolean {
-        if (AppUser.id != game!!.hostingUserId) {
+        if (AppUser.id == game!!.hostingUserId) {
             return true
         }
         return false
     }
 
     private fun increaseBonus(inGameUser: InGameUser) {
-        if (adapter.selectedPosition != -1 && ( checkUserIsHost() || inGameUser.UserId == AppUser.id)) {
+        if (adapter.selectedPosition != -1 && (checkUserIsHost() || inGameUser.UserId == AppUser.id)) {
             inGameUser.Bonus++
             adapter.notifyDataSetChanged()
         }
     }
 
     private fun decreaseBonus(inGameUser: InGameUser) {
-        if (adapter.selectedPosition != -1 && inGameUser.Bonus > 0 && ( checkUserIsHost() || inGameUser.UserId == AppUser.id)) {
+        if (adapter.selectedPosition != -1 && inGameUser.Bonus > 0 && (checkUserIsHost() || inGameUser.UserId == AppUser.id)) {
             inGameUser.Bonus--
             adapter.notifyDataSetChanged()
         }
     }
 
     private fun increaseLevel(inGameUser: InGameUser) {
-        if (adapter.selectedPosition != -1 && ( checkUserIsHost() || inGameUser.UserId == AppUser.id)) {
+        if (adapter.selectedPosition != -1 && (checkUserIsHost() || inGameUser.UserId == AppUser.id)) {
             inGameUser.Level++
         }
         adapter.notifyDataSetChanged()
     }
 
     private fun decreaseLevel(inGameUser: InGameUser) {
-        if (adapter.selectedPosition != -1 && inGameUser.Level > 1 && ( checkUserIsHost() || inGameUser.UserId == AppUser.id)) {
+        if (adapter.selectedPosition != -1 && inGameUser.Level > 1 && (checkUserIsHost() || inGameUser.UserId == AppUser.id)) {
             inGameUser.Level--
             adapter.notifyDataSetChanged()
         }
