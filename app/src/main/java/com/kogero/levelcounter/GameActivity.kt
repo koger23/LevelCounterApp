@@ -48,7 +48,7 @@ class GameActivity : AppCompatActivity() {
             tvRound.text = "Round $round"
         }
 
-        val game = getGame(42)
+        val game = getGame(gameId)
         val recyclerView = findViewById<RecyclerView>(R.id.rv_playerlist)
         recyclerView.layoutManager = LinearLayoutManager(this@GameActivity)
         recyclerView.adapter = adapter
@@ -75,7 +75,7 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun getGame(gameId: Int) {
-        val call: Call<Game> = ApiClient.getClient.startGame(42)
+        val call: Call<Game> = ApiClient.getClient.startGame(gameId)
         call.enqueue(object : Callback<Game> {
             override fun onResponse(
                 call: Call<Game>,
@@ -111,7 +111,7 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun getPlayers(gameId: Int) {
-        val call: Call<List<InGameUser>> = ApiClient.getClient.getPlayersByGameId(42)
+        val call: Call<List<InGameUser>> = ApiClient.getClient.getPlayersByGameId(gameId)
         call.enqueue(object : Callback<List<InGameUser>> {
             override fun onResponse(
                 call: Call<List<InGameUser>>,
