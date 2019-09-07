@@ -23,6 +23,7 @@ class NewGameSelectionActivity : AppCompatActivity() {
     private var viewModels = ArrayList<UserSelectionModel>()
     private val friendList: ArrayList<UserListViewModel> = ArrayList()
     var adapter = NewGameSelectionAdapter(this, viewModels)
+    var progressBar: ProgressBar? = null
 
     override fun onRestart() {
         super.onRestart()
@@ -45,8 +46,8 @@ class NewGameSelectionActivity : AppCompatActivity() {
         friendList.clear()
         getFriends()
 
-        val progressBar = findViewById<ProgressBar>(R.id.pbGameStart)
-        progressBar.visibility = View.INVISIBLE
+        progressBar = findViewById<ProgressBar>(R.id.pbGameStart)
+        progressBar!!.visibility = View.INVISIBLE
 
         recyclerView.addOnItemTouchListener(
             RecyclerViewTouchListener(
@@ -64,7 +65,7 @@ class NewGameSelectionActivity : AppCompatActivity() {
         )
         val btnStartGame = findViewById<Button>(R.id.btnStartGame)
         btnStartGame.setOnClickListener {
-            progressBar.visibility = View.VISIBLE
+            progressBar!!.visibility = View.VISIBLE
             createGame()
         }
     }
@@ -115,6 +116,7 @@ class NewGameSelectionActivity : AppCompatActivity() {
                     if (game != null) {
                         val intent = Intent(this@NewGameSelectionActivity, GameActivity::class.java)
                         intent.putExtra("GAMEID", game.id)
+                        progressBar!!.visibility = View.INVISIBLE
                         startActivity(intent)
                     } else {
                         Toast.makeText(this@NewGameSelectionActivity, "Game with not exists" + response.code(), Toast.LENGTH_LONG)

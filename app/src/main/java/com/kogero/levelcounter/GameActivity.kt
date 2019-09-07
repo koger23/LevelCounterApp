@@ -18,6 +18,9 @@ import com.kogero.levelcounter.model.RecyclerViewClickListener
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import android.content.Intent
+
+
 
 
 class GameActivity : AppCompatActivity() {
@@ -133,7 +136,7 @@ class GameActivity : AppCompatActivity() {
                 ).show()
                 if (response.code() == 200) {
                     game = response.body()
-                    if (game!!.inGameUsers.size > 0) {
+                    if (game!!.inGameUsers.isNotEmpty()) {
                         playerList.clear()
                         for (player in game!!.inGameUsers) {
                             playerList.add(player)
@@ -159,16 +162,52 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun quitMsg() {
-
+        val i = Intent(this, MainMenuActivity::class.java)
+        i.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NO_HISTORY
         AlertDialog.Builder(this)
             .setIcon(android.R.drawable.ic_dialog_alert)
             .setTitle("Quit")
             .setMessage("Are you sure to quit?")
-            .setPositiveButton("Yes") { _, _ ->
+            .setPositiveButton("Save & Quit") { _, _ ->
+                saveGame()
+                startActivity(i)
+                finish()
+            }
+            .setNeutralButton("Quit") { _, _ ->
+                startActivity(i)
                 finish()
             }
             .setNegativeButton("No", null)
             .show()
+
+    }
+
+    private fun saveGame() {
+        val call: Call<Game> = ApiClient.getClient.startGame(gameId)
+        call.enqueue(object : Callback<Game> {
+            override fun onResponse(
+                call: Call<Game>,
+                response: Response<Game>
+            ) {
+                if (response.code() == 200) {
+                    Toast.makeText(
+                        this@GameActivity,
+                        "Game saved.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+
+            override fun onFailure(call: Call<Game>, t: Throwable) {
+                Toast.makeText(
+                    this@GameActivity,
+                    "Could not connect to the server",
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
+            }
+        })
+
     }
 
     private fun startClock() {
@@ -184,7 +223,6 @@ class GameActivity : AppCompatActivity() {
 
                             val clock = findViewById<TextView>(R.id.tvTime)
                             clock.text = TimeConverter.convert(totalSecs)
-                            println()
                         }
                     }
                 } catch (e: InterruptedException) {
