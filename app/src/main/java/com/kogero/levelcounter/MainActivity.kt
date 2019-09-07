@@ -7,15 +7,19 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.kogero.levelcounter.helpers.AppUser
+import com.kogero.levelcounter.helpers.JWTUtils
 import com.kogero.levelcounter.model.requests.LoginRequest
 import com.kogero.levelcounter.model.responses.LoginResponse
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import kotlin.reflect.typeOf
 
 class MainActivity : AppCompatActivity() {
 
     var token: String = ""
+    private val appUser = AppUser
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,6 +57,7 @@ class MainActivity : AppCompatActivity() {
                     response.code() == 200 -> {
                         token = response.body()!!.token
                         ApiClient.saveToken(token)
+                        appUser.id = JWTUtils().decode(token).toString()
                         val intent = Intent(context, MainMenuActivity::class.java)
                         startActivity(intent)
                     }

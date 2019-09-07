@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.kogero.levelcounter.helpers.AppUser
 import com.kogero.levelcounter.helpers.TimeConverter
 import com.kogero.levelcounter.model.Game
 import com.kogero.levelcounter.model.Gender
@@ -35,6 +36,7 @@ class GameActivity : AppCompatActivity() {
     var playerList: ArrayList<InGameUser> = ArrayList()
     val adapter = GameAdapter(this, playerList)
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game)
@@ -50,7 +52,7 @@ class GameActivity : AppCompatActivity() {
             round++
             tvRound.text = "Round $round"
         }
-
+        Toast.makeText(this, "user id: ${AppUser.id}", Toast.LENGTH_LONG).show()
         getGame(gameId)
 
         val recyclerView = findViewById<RecyclerView>(R.id.rv_playerlist)

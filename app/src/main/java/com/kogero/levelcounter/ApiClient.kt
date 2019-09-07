@@ -2,6 +2,7 @@ package com.kogero.levelcounter
 
 import com.google.gson.GsonBuilder
 import com.kogero.levelcounter.helpers.InGameUserDeserializer
+import com.kogero.levelcounter.helpers.JWTUtils
 import com.kogero.levelcounter.model.InGameUser
 import com.kogero.levelcounter.service.ApiInterface
 import okhttp3.Interceptor
