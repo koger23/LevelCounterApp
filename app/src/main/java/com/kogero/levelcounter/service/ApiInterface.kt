@@ -67,7 +67,7 @@ interface ApiInterface {
     fun loadGame(@Query("gameId") gameId: Int): Call<Game>
 
     @GET("game/quitGame")
-    fun quitGame(@Query("gameId") gameId: Int): Call<Game>
+    fun quitGame(@Query("gameId") gameId: Int): Call<ResponseBody>
 
     @PUT("game/saveGame")
     fun saveGame(@Body game: Game?): Call<ResponseBody>

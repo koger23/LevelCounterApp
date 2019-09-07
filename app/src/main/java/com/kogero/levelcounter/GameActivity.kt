@@ -249,11 +249,11 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun quitGame() {
-        val call: Call<Game> = ApiClient.getClient.quitGame(game!!.id)
-        call.enqueue(object : Callback<Game> {
+        val call: Call<ResponseBody> = ApiClient.getClient.quitGame(game!!.id)
+        call.enqueue(object : Callback<ResponseBody> {
             override fun onResponse(
-                call: Call<Game>,
-                response: Response<Game>
+                call: Call<ResponseBody>,
+                response: Response<ResponseBody>
             ) {
                 if (response.code() == 200) {
                     Toast.makeText(
@@ -264,7 +264,7 @@ class GameActivity : AppCompatActivity() {
                 }
             }
 
-            override fun onFailure(call: Call<Game>, t: Throwable) {
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
                 Toast.makeText(
                     this@GameActivity,
                     "Could not connect to the server",
