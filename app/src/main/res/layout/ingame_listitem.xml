@@ -30,9 +30,10 @@
             android:textSize="24sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.146"
-            app:layout_constraintStart_toEndOf="@+id/tvPlayerName"
-            app:layout_constraintTop_toBottomOf="@+id/tvLevel" />
+            app:layout_constraintHorizontal_bias="0.421"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvLevel"
+            app:layout_constraintVertical_bias="0.666" />
 
         <TextView
             android:id="@+id/tvBonusValue"
@@ -43,9 +44,10 @@
             android:textSize="24sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.296"
-            app:layout_constraintStart_toEndOf="@+id/tvLevelValue"
-            app:layout_constraintTop_toBottomOf="@+id/tvBonus" />
+            app:layout_constraintHorizontal_bias="0.64"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvBonus"
+            app:layout_constraintVertical_bias="0.666" />
 
         <TextView
             android:id="@+id/tvStrengthValue"
@@ -56,8 +58,8 @@
             android:textSize="24sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.552"
-            app:layout_constraintStart_toEndOf="@+id/tvBonusValue"
+            app:layout_constraintHorizontal_bias="0.875"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvStrength"
             app:layout_constraintVertical_bias="0.666" />
 
