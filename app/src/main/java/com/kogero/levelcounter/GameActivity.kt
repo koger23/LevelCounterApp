@@ -94,24 +94,28 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun increaseBonus(inGameUser: InGameUser) {
-        inGameUser.Bonus++
-        adapter.notifyDataSetChanged()
+        if (adapter.selectedPosition != -1) {
+            inGameUser.Bonus++
+            adapter.notifyDataSetChanged()
+        }
     }
 
     private fun decreaseBonus(inGameUser: InGameUser) {
-        if (inGameUser.Bonus > 0) {
+        if (adapter.selectedPosition != -1 && inGameUser.Bonus > 0) {
             inGameUser.Bonus--
             adapter.notifyDataSetChanged()
         }
     }
 
     private fun increaseLevel(inGameUser: InGameUser) {
-        inGameUser.Level++
+        if (adapter.selectedPosition != -1) {
+            inGameUser.Level++
+        }
         adapter.notifyDataSetChanged()
     }
 
     private fun decreaseLevel(inGameUser: InGameUser) {
-        if (inGameUser.Level > 1) {
+        if (adapter.selectedPosition != -1 && inGameUser.Level > 1) {
             inGameUser.Level--
             adapter.notifyDataSetChanged()
         }
@@ -169,6 +173,7 @@ class GameActivity : AppCompatActivity() {
                 finish()
             }
             .setNeutralButton("Quit") { _, _ ->
+                quitGame()
                 startActivity(i)
                 finish()
             }
@@ -203,6 +208,33 @@ class GameActivity : AppCompatActivity() {
         })
     }
 
+    private fun quitGame() {
+        val call: Call<Game> = ApiClient.getClient.quitGame(game!!.id)
+        call.enqueue(object : Callback<Game> {
+            override fun onResponse(
+                call: Call<Game>,
+                response: Response<Game>
+            ) {
+                if (response.code() == 200) {
+                    Toast.makeText(
+                        this@GameActivity,
+                        "Code: ${response.code()}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+
+            override fun onFailure(call: Call<Game>, t: Throwable) {
+                Toast.makeText(
+                    this@GameActivity,
+                    "Could not connect to the server",
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
+            }
+        })
+    }
+
     private fun startClock() {
         val t = object : Thread() {
 
@@ -215,6 +247,9 @@ class GameActivity : AppCompatActivity() {
                                 (System.currentTimeMillis() - (startMills - additionalSecs * 1000)) / 1000
 
                             val clock = findViewById<TextView>(R.id.tvTime)
+                            if (game != null) {
+                                game!!.time = totalSecs
+                            }
                             clock.text = TimeConverter.convert(totalSecs)
                         }
                     }
