@@ -16,6 +16,7 @@ import com.kogero.levelcounter.model.Game
 import com.kogero.levelcounter.model.Gender
 import com.kogero.levelcounter.model.InGameUser
 import com.kogero.levelcounter.model.RecyclerViewClickListener
+import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -173,15 +174,14 @@ class GameActivity : AppCompatActivity() {
             }
             .setNegativeButton("No", null)
             .show()
-
     }
 
     private fun saveGame() {
-        val call: Call<Game> = ApiClient.getClient.startGame(gameId)
-        call.enqueue(object : Callback<Game> {
+        val call: Call<ResponseBody> = ApiClient.getClient.saveGame(game)
+        call.enqueue(object : Callback<ResponseBody> {
             override fun onResponse(
-                call: Call<Game>,
-                response: Response<Game>
+                call: Call<ResponseBody>,
+                response: Response<ResponseBody>
             ) {
                 if (response.code() == 200) {
                     Toast.makeText(
@@ -192,7 +192,7 @@ class GameActivity : AppCompatActivity() {
                 }
             }
 
-            override fun onFailure(call: Call<Game>, t: Throwable) {
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
                 Toast.makeText(
                     this@GameActivity,
                     "Could not connect to the server",
@@ -201,7 +201,6 @@ class GameActivity : AppCompatActivity() {
                     .show()
             }
         })
-
     }
 
     private fun startClock() {

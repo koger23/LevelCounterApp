@@ -68,6 +68,9 @@ interface ApiInterface {
     @POST("game/quitGame")
     fun quitGame(@Query("gameId") gameId: Int): Call<Game>
 
+    @POST("game/saveGame")
+    fun saveGame(@Body game: Game?): Call<ResponseBody>
+
     @DELETE("game/delete")
     fun deleteGame(@Query("gameId") gameId: Int): Call<ResponseBody>
 
