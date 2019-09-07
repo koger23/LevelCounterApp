@@ -43,8 +43,6 @@ class GameAdapter(
             holder.tvStrength.setTextColor(Color.WHITE)
             holder.tvStrengthValue.setTextColor(Color.WHITE)
             holder.tvGender.setTextColor(Color.WHITE)
-        } else {
-            holder.layoutPlayer.setBackgroundResource(R.color.munchkinYellow)
         }
         holder.tvPlayerName.text = userList[position].UserName
         holder.tvLevelValue.text = userList[position].Level.toString()
