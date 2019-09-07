@@ -1,10 +1,12 @@
 package com.kogero.levelcounter
 
 import android.content.Context
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.kogero.levelcounter.model.Gender
 import com.kogero.levelcounter.model.InGameUser
@@ -16,6 +18,7 @@ class GameAdapter(
 ) :
     RecyclerView.Adapter<GameAdapter.InGameViewHolder>() {
 
+    var selectedPosition: Int = -1
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): InGameViewHolder {
         return InGameViewHolder(
@@ -30,14 +33,38 @@ class GameAdapter(
     }
 
     override fun onBindViewHolder(holder: InGameViewHolder, position: Int) {
+        if (position != -1 && position == selectedPosition) {
+            holder.layoutPlayer.setBackgroundResource(R.color.munchkinBrown)
+            holder.tvPlayerName.setTextColor(Color.WHITE)
+            holder.tvLevel.setTextColor(Color.WHITE)
+            holder.tvLevelValue.setTextColor(Color.WHITE)
+            holder.tvBonus.setTextColor(Color.WHITE)
+            holder.tvBonusValue.setTextColor(Color.WHITE)
+            holder.tvStrength.setTextColor(Color.WHITE)
+            holder.tvStrengthValue.setTextColor(Color.WHITE)
+            holder.tvGender.setTextColor(Color.WHITE)
+        } else {
+            holder.layoutPlayer.setBackgroundResource(R.color.munchkinYellow)
+        }
         holder.tvPlayerName.text = userList[position].UserName
-        holder.tvLevel.text = userList[position].Level.toString()
-        holder.tvBonus.text = userList[position].Bonus.toString()
-        holder.tvStrength.text = (userList[position].Bonus + userList[position].Level).toString()
+        holder.tvLevelValue.text = userList[position].Level.toString()
+        holder.tvBonusValue.text = userList[position].Bonus.toString()
+        holder.tvStrengthValue.text = (userList[position].Bonus + userList[position].Level).toString()
         holder.tvGender.text = setGender(userList[position].Gender)
+
+        holder.layoutPlayer.setOnClickListener {
+            View.OnClickListener { println("Positon in adapter when clicked: $selectedPosition") }
+        }
+
+        holder.layoutPlayer.setOnClickListener(View.OnClickListener {
+            selectedPosition = position
+            notifyDataSetChanged()
+        })
+
     }
 
-    private fun setGender(gender: Gender) : String {
+
+    private fun setGender(gender: Gender): String {
         if (gender == Gender.FEMALE) {
             return "female"
         }
@@ -46,10 +73,14 @@ class GameAdapter(
 
     inner class InGameViewHolder(view: View) : RecyclerView.ViewHolder(view),
         View.OnClickListener {
+        val layoutPlayer: ConstraintLayout = view.player_item_layout
         val tvPlayerName: TextView = view.tvPlayerName
-        val tvLevel: TextView = view.tvLevelValue
-        val tvBonus: TextView = view.tvBonusValue
-        val tvStrength: TextView = view.tvStrengthValue
+        val tvLevel: TextView = view.tvLevel
+        val tvLevelValue: TextView = view.tvLevelValue
+        val tvBonus: TextView = view.tvBonus
+        val tvBonusValue: TextView = view.tvBonusValue
+        val tvStrength: TextView = view.tvStrength
+        val tvStrengthValue: TextView = view.tvStrengthValue
         val tvGender: TextView = view.tvGender
 
         init {
@@ -57,7 +88,7 @@ class GameAdapter(
             this.setIsRecyclable(false)
         }
 
-        override fun onClick(v: View) {
+        override fun onClick(view: View) {
         }
     }
 }

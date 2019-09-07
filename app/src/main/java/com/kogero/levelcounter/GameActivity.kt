@@ -2,6 +2,7 @@ package com.kogero.levelcounter
 
 import android.app.AlertDialog
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
@@ -11,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.kogero.levelcounter.helpers.TimeConverter
 import com.kogero.levelcounter.model.Game
 import com.kogero.levelcounter.model.InGameUser
+import com.kogero.levelcounter.model.RecyclerViewClickListener
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -50,6 +52,20 @@ class GameActivity : AppCompatActivity() {
         val recyclerView = findViewById<RecyclerView>(R.id.rv_playerlist)
         recyclerView.layoutManager = LinearLayoutManager(this@GameActivity)
         recyclerView.adapter = adapter
+        recyclerView.addOnItemTouchListener(
+            RecyclerViewTouchListener(
+                applicationContext,
+                recyclerView,
+                object : RecyclerViewClickListener {
+                    override fun onClick(view: View, position: Int) {
+                        adapter.selectedPosition = position
+                        print(position)
+                    }
+
+                    override fun onLongClick(view: View, position: Int) {
+                    }
+                })
+        )
 
         if (isFirstStart) {
             startClock()
