@@ -7,6 +7,7 @@ import com.kogero.levelcounter.model.UserListViewModel
 import com.kogero.levelcounter.model.requests.InGameUserCreationRequest
 import com.kogero.levelcounter.model.requests.LoginRequest
 import com.kogero.levelcounter.model.requests.SignUpRequest
+import com.kogero.levelcounter.model.responses.GameListResponse
 import com.kogero.levelcounter.model.responses.LoginResponse
 import com.kogero.levelcounter.model.responses.SignUpResponse
 import okhttp3.ResponseBody

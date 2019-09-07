@@ -20,6 +20,9 @@ class MainMenuActivity : AppCompatActivity() {
         val btnJoinGame = findViewById<Button>(R.id.btnJoinGame)
 
         val btnLoadGame = findViewById<Button>(R.id.btnLoadGame)
+        btnLoadGame.setOnClickListener {
+            val intent = Intent(this, LoadGameActivity::class.java)
+            startActivity(intent)}
 
         val btnStat = findViewById<Button>(R.id.btnMyStats)
         btnStat.setOnClickListener {
