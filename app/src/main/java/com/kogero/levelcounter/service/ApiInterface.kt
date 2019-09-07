@@ -74,6 +74,9 @@ interface ApiInterface {
     @GET("game/savedGames")
     fun getSavedGames(): Call<List<Game>>
 
-    @GET("game/joinableGames")
+    @GET("game/getplayers")
     fun getJoinableGames(): Call<List<Game>>
+
+    @GET("game/joinableGames")
+    fun getPlayersByGameId(@Query("gameId") gameId: Int): Call<List<InGameUser>>
 }

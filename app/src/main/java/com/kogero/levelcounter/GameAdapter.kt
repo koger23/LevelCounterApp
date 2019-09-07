@@ -6,15 +6,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.kogero.levelcounter.model.Gender
 import com.kogero.levelcounter.model.InGameUser
 import kotlinx.android.synthetic.main.ingame_listitem.view.*
 
 class GameAdapter(
     private val context: Context,
     private val userList: List<InGameUser>
-    ) :
+) :
     RecyclerView.Adapter<GameAdapter.InGameViewHolder>() {
-
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): InGameViewHolder {
@@ -33,13 +33,24 @@ class GameAdapter(
         holder.tvPlayerName.text = userList[position].UserName
         holder.tvLevel.text = userList[position].Level.toString()
         holder.tvBonus.text = userList[position].Bonus.toString()
+        holder.tvStrength.text = (userList[position].Bonus + userList[position].Level).toString()
+        holder.tvGender.text = setGender(userList[position].Gender)
+    }
+
+    private fun setGender(gender: Gender) : String {
+        if (gender == Gender.FEMALE) {
+            return "female"
+        }
+        return "male"
     }
 
     inner class InGameViewHolder(view: View) : RecyclerView.ViewHolder(view),
         View.OnClickListener {
         val tvPlayerName: TextView = view.tvPlayerName
-        val tvLevel: TextView = view.tvLevel
-        val tvBonus: TextView = view.tvBonus
+        val tvLevel: TextView = view.tvLevelValue
+        val tvBonus: TextView = view.tvBonusValue
+        val tvStrength: TextView = view.tvStrengthValue
+        val tvGender: TextView = view.tvGender
 
         init {
             view.setOnClickListener(this)

@@ -38,10 +38,10 @@ class FriendsAdapter(
     }
 
     fun filterUsers(query: String): List<UserListViewModel> {
-        var query = query.toLowerCase()
+        val query = query.toLowerCase()
         userList.clear()
         for (user1 in userFullList) {
-            if (user1.userName?.toLowerCase()!!.contains(query)) {
+            if (user1.userName.toLowerCase().contains(query)) {
                 userList.add(user1)
             }
         }

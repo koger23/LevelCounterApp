@@ -26,13 +26,12 @@ class NewGameSelectionActivity : AppCompatActivity() {
 
     override fun onRestart() {
         super.onRestart()
-        getFriends()
+        friendList.clear()
         adapter.notifyDataSetChanged()
     }
 
     override fun onResume() {
         super.onResume()
-        getFriends()
         adapter.notifyDataSetChanged()
     }
 
@@ -43,9 +42,10 @@ class NewGameSelectionActivity : AppCompatActivity() {
         val recyclerView = findViewById<RecyclerView>(R.id.rv_selectfriends)
         recyclerView.layoutManager = LinearLayoutManager(this@NewGameSelectionActivity)
         recyclerView.adapter = adapter
+        friendList.clear()
         getFriends()
 
-        var progressBar = findViewById<ProgressBar>(R.id.pbGameStart)
+        val progressBar = findViewById<ProgressBar>(R.id.pbGameStart)
         progressBar.visibility = View.INVISIBLE
 
         recyclerView.addOnItemTouchListener(
@@ -67,37 +67,6 @@ class NewGameSelectionActivity : AppCompatActivity() {
             progressBar.visibility = View.VISIBLE
             createGame()
         }
-    }
-
-    private fun startGame(gameId: Int) {
-        val call: Call<Game> = ApiClient.getClient.startGame(gameId)
-        call.enqueue(object : Callback<Game> {
-            override fun onResponse(
-                call: Call<Game>,
-                response: Response<Game>
-            ) {
-                val game: Game? = response.body()
-                if (response.code() == 200) {
-                    val gameId = game?.id
-                    val intent = Intent(this@NewGameSelectionActivity, GameActivity::class.java)
-                    intent.putExtra("GAMEID", game?.id)
-                    startActivity(intent)
-
-                } else {
-                    Toast.makeText(this@NewGameSelectionActivity, "Error while starting the game: " + response.code(), Toast.LENGTH_LONG)
-                        .show()
-                }
-            }
-
-            override fun onFailure(call: Call<Game>, t: Throwable) {
-                Toast.makeText(
-                    this@NewGameSelectionActivity,
-                    "Could not connect to the server when trying start the game",
-                    Toast.LENGTH_SHORT
-                )
-                    .show()
-            }
-        })
     }
 
     private fun createGame() {
@@ -144,7 +113,9 @@ class NewGameSelectionActivity : AppCompatActivity() {
                 val game: Game? = response.body()
                 if (response.code() == 200) {
                     if (game != null) {
-                        startGame(game.id)
+                        val intent = Intent(this@NewGameSelectionActivity, GameActivity::class.java)
+                        intent.putExtra("GAMEID", game.id)
+                        startActivity(intent)
                     } else {
                         Toast.makeText(this@NewGameSelectionActivity, "Game with not exists" + response.code(), Toast.LENGTH_LONG)
                             .show()
