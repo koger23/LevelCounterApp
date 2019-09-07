@@ -52,7 +52,7 @@ class GameActivity : AppCompatActivity() {
             round++
             tvRound.text = "Round $round"
         }
-        Toast.makeText(this, "user id: ${AppUser.id}", Toast.LENGTH_LONG).show()
+
         getGame(gameId)
 
         val recyclerView = findViewById<RecyclerView>(R.id.rv_playerlist)
@@ -64,7 +64,9 @@ class GameActivity : AppCompatActivity() {
                 recyclerView,
                 object : RecyclerViewClickListener {
                     override fun onClick(view: View, position: Int) {
-                        adapter.selectedPosition = position
+                        if (checkUserIsHost()) {
+                            adapter.selectedPosition = position
+                        }
                     }
 
                     override fun onLongClick(view: View, position: Int) {
@@ -86,38 +88,53 @@ class GameActivity : AppCompatActivity() {
         }
 
         val btnBonusPlus = findViewById<ImageButton>(R.id.btnBonusPlus)
-        btnBonusPlus.setOnClickListener { increaseBonus(playerList[adapter.selectedPosition]) }
+        btnBonusPlus.setOnClickListener {
+            increaseBonus(playerList[adapter.selectedPosition])
+        }
         val btnBonusMinus = findViewById<ImageButton>(R.id.btnBonusMin)
-        btnBonusMinus.setOnClickListener { decreaseBonus(playerList[adapter.selectedPosition]) }
+        btnBonusMinus.setOnClickListener {
+            decreaseBonus(playerList[adapter.selectedPosition])
+        }
         val btnLevelPlus = findViewById<ImageButton>(R.id.btnLevelPlus)
-        btnLevelPlus.setOnClickListener { increaseLevel(playerList[adapter.selectedPosition]) }
+        btnLevelPlus.setOnClickListener {
+            increaseLevel(playerList[adapter.selectedPosition])
+        }
         val btnLevelMinus = findViewById<ImageButton>(R.id.btnLevelMin)
-        btnLevelMinus.setOnClickListener { decreaseLevel(playerList[adapter.selectedPosition]) }
+        btnLevelMinus.setOnClickListener {
+            decreaseLevel(playerList[adapter.selectedPosition])
+        }
+    }
+
+    private fun checkUserIsHost(): Boolean {
+        if (AppUser.id != game!!.hostingUserId) {
+            return true
+        }
+        return false
     }
 
     private fun increaseBonus(inGameUser: InGameUser) {
-        if (adapter.selectedPosition != -1) {
+        if (adapter.selectedPosition != -1 && ( checkUserIsHost() || inGameUser.UserId == AppUser.id)) {
             inGameUser.Bonus++
             adapter.notifyDataSetChanged()
         }
     }
 
     private fun decreaseBonus(inGameUser: InGameUser) {
-        if (adapter.selectedPosition != -1 && inGameUser.Bonus > 0) {
+        if (adapter.selectedPosition != -1 && inGameUser.Bonus > 0 && ( checkUserIsHost() || inGameUser.UserId == AppUser.id)) {
             inGameUser.Bonus--
             adapter.notifyDataSetChanged()
         }
     }
 
     private fun increaseLevel(inGameUser: InGameUser) {
-        if (adapter.selectedPosition != -1) {
+        if (adapter.selectedPosition != -1 && ( checkUserIsHost() || inGameUser.UserId == AppUser.id)) {
             inGameUser.Level++
         }
         adapter.notifyDataSetChanged()
     }
 
     private fun decreaseLevel(inGameUser: InGameUser) {
-        if (adapter.selectedPosition != -1 && inGameUser.Level > 1) {
+        if (adapter.selectedPosition != -1 && inGameUser.Level > 1 && ( checkUserIsHost() || inGameUser.UserId == AppUser.id)) {
             inGameUser.Level--
             adapter.notifyDataSetChanged()
         }
@@ -163,6 +180,29 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun quitMsg() {
+        if (checkUserIsHost()) {
+            hostQuit()
+        } else {
+            joinedPlayerQuit()
+        }
+    }
+
+    private fun joinedPlayerQuit() {
+        val i = Intent(this, MainMenuActivity::class.java)
+        i.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NO_HISTORY
+        AlertDialog.Builder(this)
+            .setIcon(android.R.drawable.ic_dialog_alert)
+            .setTitle("Quit")
+            .setMessage("Are you sure to quit?")
+            .setNeutralButton("Yes") { _, _ ->
+                startActivity(i)
+                finish()
+            }
+            .setNegativeButton("No", null)
+            .show()
+    }
+
+    private fun hostQuit() {
         val i = Intent(this, MainMenuActivity::class.java)
         i.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NO_HISTORY
         AlertDialog.Builder(this)
