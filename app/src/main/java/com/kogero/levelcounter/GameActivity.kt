@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -11,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.kogero.levelcounter.helpers.TimeConverter
 import com.kogero.levelcounter.model.Game
+import com.kogero.levelcounter.model.Gender
 import com.kogero.levelcounter.model.InGameUser
 import com.kogero.levelcounter.model.RecyclerViewClickListener
 import retrofit2.Call
@@ -59,10 +61,17 @@ class GameActivity : AppCompatActivity() {
                 object : RecyclerViewClickListener {
                     override fun onClick(view: View, position: Int) {
                         adapter.selectedPosition = position
-                        print(position)
                     }
 
                     override fun onLongClick(view: View, position: Int) {
+                        var playerGender = playerList[adapter.selectedPosition].Gender
+                        playerGender = if (playerGender == Gender.MALE){
+                            Gender.FEMALE
+                        } else {
+                            Gender.MALE
+                        }
+                        playerList[adapter.selectedPosition].Gender = playerGender
+                        adapter.notifyDataSetChanged()
                     }
                 })
         )
@@ -72,10 +81,42 @@ class GameActivity : AppCompatActivity() {
             isFirstStart = false
         }
 
-        val tvBonus = findViewById<TextView>(R.id.tvBonusValue)
-        val tvLevel = findViewById<TextView>(R.id.tvLevelValue)
-        val tvBonusSetValue = findViewById<TextView>(R.id.tvBonusSetValue)
-        val tvLevelSetValue = findViewById<TextView>(R.id.tvLevelSetValue)
+        val btnBonusPlus = findViewById<ImageButton>(R.id.btnBonusPlus)
+        btnBonusPlus.setOnClickListener(
+            View.OnClickListener { increaseBonus(playerList[adapter.selectedPosition]) }
+        )
+        val btnBonusMinus = findViewById<ImageButton>(R.id.btnBonusMin)
+        btnBonusMinus.setOnClickListener(
+            View.OnClickListener { decreaseBonus(playerList[adapter.selectedPosition]) }
+        )
+        val btnLevelPlus = findViewById<ImageButton>(R.id.btnLevelPlus)
+        btnLevelPlus.setOnClickListener(
+            View.OnClickListener { increaseLevel(playerList[adapter.selectedPosition]) }
+        )
+        val btnLevelMinus = findViewById<ImageButton>(R.id.btnLevelMin)
+        btnLevelMinus.setOnClickListener(
+            View.OnClickListener { decreaseLevel(playerList[adapter.selectedPosition]) }
+        )
+    }
+
+    private fun increaseBonus(inGameUser: InGameUser) {
+        inGameUser.Bonus++
+        adapter.notifyDataSetChanged()
+    }
+
+    private fun decreaseBonus(inGameUser: InGameUser) {
+        inGameUser.Bonus--
+        adapter.notifyDataSetChanged()
+    }
+
+    private fun increaseLevel(inGameUser: InGameUser) {
+        inGameUser.Level++
+        adapter.notifyDataSetChanged()
+    }
+
+    private fun decreaseLevel(inGameUser: InGameUser) {
+        inGameUser.Level--
+        adapter.notifyDataSetChanged()
     }
 
     private fun getGame(gameId: Int) {

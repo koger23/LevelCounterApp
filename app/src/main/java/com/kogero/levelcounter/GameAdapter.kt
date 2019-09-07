@@ -71,6 +71,7 @@ class GameAdapter(
 
     inner class InGameViewHolder(view: View) : RecyclerView.ViewHolder(view),
         View.OnClickListener {
+
         val layoutPlayer: ConstraintLayout = view.player_item_layout
         val tvPlayerName: TextView = view.tvPlayerName
         val tvLevel: TextView = view.tvLevel
