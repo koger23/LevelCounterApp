@@ -1,6 +1,8 @@
 package com.kogero.levelcounter
 
 import com.google.gson.GsonBuilder
+import com.kogero.levelcounter.helpers.InGameUserDeserializer
+import com.kogero.levelcounter.model.InGameUser
 import com.kogero.levelcounter.service.ApiInterface
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -17,10 +19,11 @@ object ApiClient {
         this.token = token
     }
 
-    private const val BASE_URL = "https://319ad028.ngrok.io/api/"
+    private const val BASE_URL = "https://cab39bab.ngrok.io/api/"
     val getClient: ApiInterface
         get() {
             val gson = GsonBuilder()
+                .registerTypeAdapter(InGameUser::class.java, InGameUserDeserializer())
                 .setLenient()
                 .create()
 
