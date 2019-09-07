@@ -1,11 +1,21 @@
 package com.kogero.levelcounter.model
 
-class InGameUser (
+import com.google.gson.annotations.SerializedName
+import java.io.Serializable
+
+data class InGameUser (
+    @SerializedName("inGameUserId")
     val InGameUserId: Int,
-    val UserId: Int,
+    @SerializedName("userId")
+    val UserId: String,
+    @SerializedName("userName")
     val UserName: String,
-    val Level: Int,
-    val Bonus: Int,
+    @SerializedName("level")
+    var Level: Int = 1,
+    @SerializedName("bonus")
+    var Bonus: Int = 0,
+    @SerializedName("gameId")
     val GameId: Int,
-    val Gender: Gender
-)
+    @SerializedName("gender")
+    var Gender: Gender = com.kogero.levelcounter.model.Gender.MALE
+) : Serializable
