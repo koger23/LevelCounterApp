@@ -65,7 +65,7 @@ class GameActivity : AppCompatActivity() {
 
                     override fun onLongClick(view: View, position: Int) {
                         var playerGender = playerList[adapter.selectedPosition].Gender
-                        playerGender = if (playerGender == Gender.MALE){
+                        playerGender = if (playerGender == Gender.MALE) {
                             Gender.FEMALE
                         } else {
                             Gender.MALE
@@ -83,19 +83,19 @@ class GameActivity : AppCompatActivity() {
 
         val btnBonusPlus = findViewById<ImageButton>(R.id.btnBonusPlus)
         btnBonusPlus.setOnClickListener(
-            View.OnClickListener { increaseBonus(playerList[adapter.selectedPosition]) }
+            { increaseBonus(playerList[adapter.selectedPosition]) }
         )
         val btnBonusMinus = findViewById<ImageButton>(R.id.btnBonusMin)
         btnBonusMinus.setOnClickListener(
-            View.OnClickListener { decreaseBonus(playerList[adapter.selectedPosition]) }
+            { decreaseBonus(playerList[adapter.selectedPosition]) }
         )
         val btnLevelPlus = findViewById<ImageButton>(R.id.btnLevelPlus)
         btnLevelPlus.setOnClickListener(
-            View.OnClickListener { increaseLevel(playerList[adapter.selectedPosition]) }
+            { increaseLevel(playerList[adapter.selectedPosition]) }
         )
         val btnLevelMinus = findViewById<ImageButton>(R.id.btnLevelMin)
         btnLevelMinus.setOnClickListener(
-            View.OnClickListener { decreaseLevel(playerList[adapter.selectedPosition]) }
+            { decreaseLevel(playerList[adapter.selectedPosition]) }
         )
     }
 
