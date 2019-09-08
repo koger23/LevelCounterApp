@@ -12,6 +12,7 @@ import kotlinx.android.synthetic.main.loadgame_list_item.view.*
 import java.text.SimpleDateFormat
 import java.util.*
 
+
 class LoadGameAdapter(
     private val context: Context,
     private val gameList: List<Game>
@@ -19,7 +20,16 @@ class LoadGameAdapter(
     RecyclerView.Adapter<LoadGameAdapter.LoadGameViewHolder>() {
     override fun onBindViewHolder(holder: LoadGameViewHolder, position: Int) {
         holder.tvNo.text = "${position + 1}."
-        holder.tvDate.text = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.ENGLISH).format(TimeConverter.fromStringToDate(gameList[position].dateTime, "yyyy-MM-dd'T'HH:mm:ss")).toString() // gameList[position].dateTime
+        holder.tvDate.text = SimpleDateFormat(
+            "yyyy-MM-dd HH:mm",
+            Locale.ENGLISH
+        ).format(
+            TimeConverter.fromStringToDate(
+                gameList[position].dateTime,
+                "yyyy-MM-dd'T'HH:mm:ss"
+            )
+        ).toString()
+        holder.tvPlayer.text = "Number of players: ${gameList[position].inGameUsers.size}"
     }
 
     override fun onCreateViewHolder(
@@ -42,6 +52,7 @@ class LoadGameAdapter(
 
         val tvNo: TextView = view.tvNo
         val tvDate: TextView = view.tvDate
+        val tvPlayer: TextView = view.tvPlayers
 
         init {
             view.setOnClickListener(this)
