@@ -18,6 +18,9 @@ class MainMenuActivity : AppCompatActivity() {
             startActivity(intent)}
 
         val btnJoinGame = findViewById<Button>(R.id.btnJoinGame)
+        btnJoinGame.setOnClickListener {
+            val intent = Intent(this, JoinGameActivity::class.java)
+            startActivity(intent)}
 
         val btnLoadGame = findViewById<Button>(R.id.btnLoadGame)
         btnLoadGame.setOnClickListener {

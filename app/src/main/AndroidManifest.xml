@@ -30,6 +30,8 @@
         <activity android:name=".NewGameSelectionActivity" />
         <activity android:name=".GameActivity" />
         <activity android:name=".LoadGameActivity" />
+        <activity android:name=".JoinGameActivity" />
+        <activity android:name=".LoadedGameActivity" />
     </application>
 
 </manifest>

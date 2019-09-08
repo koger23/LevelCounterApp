@@ -13,7 +13,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class LoadGameActivity : AppCompatActivity() {
+class JoinGameActivity : AppCompatActivity() {
     var gameList: ArrayList<Game> = ArrayList()
     val adapter = LoadGameAdapter(this, gameList)
 
@@ -21,8 +21,10 @@ class LoadGameActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_loadgame)
 
+        getGames()
+
         val recyclerView = findViewById<RecyclerView>(R.id.rv_load_game_list)
-        recyclerView.layoutManager = LinearLayoutManager(this@LoadGameActivity)
+        recyclerView.layoutManager = LinearLayoutManager(this@JoinGameActivity)
         recyclerView.adapter = adapter
         recyclerView.addOnItemTouchListener(
             RecyclerViewTouchListener(
@@ -39,24 +41,23 @@ class LoadGameActivity : AppCompatActivity() {
                     }
                 })
         )
-        getGames()
     }
 
     fun loadGame(gameId: Int) {
-        val call: Call<Game> = ApiClient.getClient.startGame(gameId)
+        val call: Call<Game> = ApiClient.getClient.joinGame(gameId)
         call.enqueue(object : Callback<Game> {
             override fun onResponse(
                 call: Call<Game>,
                 response: Response<Game>
             ) {
                 Toast.makeText(
-                    this@LoadGameActivity,
+                    this@JoinGameActivity,
                     "Code: ${response.code()}",
                     Toast.LENGTH_SHORT
                 ).show()
                 val game = response.body()
                 if (game != null) {
-                    val intent = Intent(this@LoadGameActivity, GameActivity::class.java)
+                    val intent = Intent(this@JoinGameActivity, LoadedGameActivity::class.java)
                     intent.putExtra("GAMEID", game.id)
                     startActivity(intent)
                 }
@@ -64,7 +65,7 @@ class LoadGameActivity : AppCompatActivity() {
 
             override fun onFailure(call: Call<Game>, t: Throwable) {
                 Toast.makeText(
-                    this@LoadGameActivity,
+                    this@JoinGameActivity,
                     "Could not connect to the server",
                     Toast.LENGTH_SHORT
                 )
@@ -74,14 +75,14 @@ class LoadGameActivity : AppCompatActivity() {
     }
 
     private fun getGames() {
-        val call: Call<List<Game>> = ApiClient.getClient.getSavedGames()
+        val call: Call<List<Game>> = ApiClient.getClient.getJoinableGames()
         call.enqueue(object : Callback<List<Game>> {
             override fun onResponse(
                 call: Call<List<Game>>,
                 response: Response<List<Game>>
             ) {
                 Toast.makeText(
-                    this@LoadGameActivity,
+                    this@JoinGameActivity,
                     "Code: ${response.code()}",
                     Toast.LENGTH_SHORT
                 ).show()
@@ -97,7 +98,7 @@ class LoadGameActivity : AppCompatActivity() {
 
             override fun onFailure(call: Call<List<Game>>, t: Throwable) {
                 Toast.makeText(
-                    this@LoadGameActivity,
+                    this@JoinGameActivity,
                     "Could not connect to the server",
                     Toast.LENGTH_SHORT
                 )
