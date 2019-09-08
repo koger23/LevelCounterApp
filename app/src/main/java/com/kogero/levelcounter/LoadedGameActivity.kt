@@ -31,6 +31,7 @@ class LoadedGameActivity : AppCompatActivity() {
     private var round = 1
     private var isFirstStart = true
     var gameId: Int = 0
+    var gameIsRunning = true
 
     var game: Game? = null
     var playerList: ArrayList<InGameUser> = ArrayList()
@@ -193,6 +194,7 @@ class LoadedGameActivity : AppCompatActivity() {
             .setTitle("Quit")
             .setMessage("Are you sure to quit?")
             .setNeutralButton("Yes") { _, _ ->
+                gameIsRunning = false
                 startActivity(i)
                 finish()
             }
@@ -229,11 +231,7 @@ class LoadedGameActivity : AppCompatActivity() {
                 response: Response<ResponseBody>
             ) {
                 if (response.code() == 200) {
-                    Toast.makeText(
-                        this@LoadedGameActivity,
-                        "Game saved.",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    gameIsRunning = false
                 }
             }
 
@@ -261,6 +259,7 @@ class LoadedGameActivity : AppCompatActivity() {
                         "Code: ${response.code()}",
                         Toast.LENGTH_SHORT
                     ).show()
+                    gameIsRunning = false
                 }
             }
 
@@ -280,7 +279,7 @@ class LoadedGameActivity : AppCompatActivity() {
 
             override fun run() {
                 try {
-                    while (!isInterrupted) {
+                    while (gameIsRunning) {
                         sleep(1000)
                         runOnUiThread {
                             totalSecs =

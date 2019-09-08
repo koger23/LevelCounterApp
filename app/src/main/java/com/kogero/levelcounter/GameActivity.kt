@@ -31,6 +31,7 @@ class GameActivity : AppCompatActivity() {
     private var round = 1
     private var isFirstStart = true
     var gameId: Int = 0
+    var gameIsRunning = true
 
     var game: Game? = null
     var playerList: ArrayList<InGameUser> = ArrayList()
@@ -229,6 +230,29 @@ class GameActivity : AppCompatActivity() {
                 response: Response<ResponseBody>
             ) {
                 if (response.code() == 200) {
+                    gameIsRunning = false
+                }
+            }
+
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                Toast.makeText(
+                    this@GameActivity,
+                    "Could not connect to the server",
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
+            }
+        })
+    }
+
+    private fun updateGame() {
+        val call: Call<ResponseBody> = ApiClient.getClient.updateGame(game)
+        call.enqueue(object : Callback<ResponseBody> {
+            override fun onResponse(
+                call: Call<ResponseBody>,
+                response: Response<ResponseBody>
+            ) {
+                if (response.code() == 200) {
                     Toast.makeText(
                         this@GameActivity,
                         "Game saved.",
@@ -256,11 +280,7 @@ class GameActivity : AppCompatActivity() {
                 response: Response<ResponseBody>
             ) {
                 if (response.code() == 200) {
-                    Toast.makeText(
-                        this@GameActivity,
-                        "Code: ${response.code()}",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    gameIsRunning = false
                 }
             }
 
@@ -280,7 +300,7 @@ class GameActivity : AppCompatActivity() {
 
             override fun run() {
                 try {
-                    while (!isInterrupted) {
+                    while (gameIsRunning) {
                         sleep(1000)
                         runOnUiThread {
                             totalSecs =
