@@ -9,7 +9,6 @@ import java.lang.reflect.Type
 
 class InGameUserDeserializer : JsonDeserializer<InGameUser> {
 
-    // @Throws(JsonParseException::class)
     override fun deserialize(
         json: JsonElement,
         typeOfT: Type,
@@ -34,5 +33,4 @@ class InGameUserDeserializer : JsonDeserializer<InGameUser> {
         }
         return inGameUser
     }
-
 }
