@@ -6,8 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.kogero.levelcounter.helpers.TimeConverter
 import com.kogero.levelcounter.model.Game
 import kotlinx.android.synthetic.main.loadgame_list_item.view.*
+import java.text.SimpleDateFormat
+import java.util.*
 
 class LoadGameAdapter(
     private val context: Context,
@@ -16,7 +19,7 @@ class LoadGameAdapter(
     RecyclerView.Adapter<LoadGameAdapter.LoadGameViewHolder>() {
     override fun onBindViewHolder(holder: LoadGameViewHolder, position: Int) {
         holder.tvNo.text = "${position + 1}."
-//        holder.tvDate.text = gameList[position].dateTime.toString()
+        holder.tvDate.text = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.ENGLISH).format(TimeConverter.fromStringToDate(gameList[position].dateTime, "yyyy-MM-dd'T'HH:mm:ss")).toString() // gameList[position].dateTime
     }
 
     override fun onCreateViewHolder(
