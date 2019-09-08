@@ -20,7 +20,7 @@ object ApiClient {
         this.token = token
     }
 
-    private const val BASE_URL = "https://cab39bab.ngrok.io/api/"
+    private const val BASE_URL = "https://9063590e.ngrok.io/api/"
     val getClient: ApiInterface
         get() {
             val gson = GsonBuilder()
