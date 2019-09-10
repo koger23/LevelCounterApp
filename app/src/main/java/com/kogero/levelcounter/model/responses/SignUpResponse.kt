@@ -5,5 +5,6 @@ data class SignUpResponse(
     val UserName: List<String>,
     val Password: List<String>,
     val VerifyPassword: List<String>,
-    val Email: List<String>
+    val Email: String,
+    val ErrorMessages: List<String>
 )
