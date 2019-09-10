@@ -57,7 +57,7 @@ class SignUpActivity : AppCompatActivity() {
                 call: Call<SignUpResponse>,
                 response: Response<SignUpResponse>
             ) {
-                if (response.code() == 200) {
+                if (response.code() == 201) {
                     Toast.makeText(
                         this@SignUpActivity,
                         "Registration successful",
@@ -65,6 +65,13 @@ class SignUpActivity : AppCompatActivity() {
                     )
                         .show()
                     this@SignUpActivity.finish()
+                } else if (response.code() == 400) {
+                    Toast.makeText(
+                        this@SignUpActivity,
+                        "Error: ${response.body()!!.ErrorMessages}",
+                        Toast.LENGTH_LONG
+                    )
+                        .show()
                 }
             }
 
