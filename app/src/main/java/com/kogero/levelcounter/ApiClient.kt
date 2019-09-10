@@ -9,6 +9,9 @@ import okhttp3.OkHttpClient
 import okhttp3.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import com.kogero.levelcounter.helpers.UnsafeOkHttpClient
+
+
 
 
 object ApiClient {
@@ -19,7 +22,9 @@ object ApiClient {
         this.token = token
     }
 
-    private const val BASE_URL = "https://e87f6e29.ngrok.io/api/"
+    var okHttpClient = UnsafeOkHttpClient.unsafeOkHttpClient
+
+    private const val BASE_URL = "https://koger23.myftp.org/api/"
     val getClient: ApiInterface
         get() {
             val gson = GsonBuilder()
@@ -27,9 +32,11 @@ object ApiClient {
                 .setLenient()
                 .create()
 
-            val client = OkHttpClient.Builder()
-                .addInterceptor(LevelCounterInterceptor())
-                .build()
+            val client = okHttpClient
+
+//            val client = OkHttpClient.Builder()
+//                .addInterceptor(LevelCounterInterceptor())
+//                .build()
 
             val retrofit = Retrofit.Builder()
                 .baseUrl(BASE_URL)
