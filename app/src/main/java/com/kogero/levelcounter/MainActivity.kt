@@ -14,12 +14,20 @@ import com.kogero.levelcounter.model.responses.LoginResponse
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import kotlin.reflect.typeOf
+
+
 
 class MainActivity : AppCompatActivity() {
 
     var token: String = ""
     private val appUser = AppUser
+    private val PREFS_NAME = "preferences"
+    private val PREF_UNAME = "Username"
+    private val PREF_PASSWORD = "Password"
+    private val DefaultUnameValue = ""
+    private var UnameValue: String? = null
+    private val DefaultPasswordValue = ""
+    private var PasswordValue: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,6 +48,48 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    public override fun onPause() {
+        super.onPause()
+        savePreferences()
+
+    }
+
+    public override fun onResume() {
+        super.onResume()
+        loadPreferences()
+    }
+
+    private fun savePreferences() {
+        val settings = getSharedPreferences(
+            PREFS_NAME,
+            Context.MODE_PRIVATE
+        )
+        val editor = settings.edit()
+
+        // Edit and commit
+        UnameValue = findViewById<EditText>(R.id.editTextUserName).text.toString()
+        PasswordValue = findViewById<EditText>(R.id.editTextPassword).text.toString()
+        editor.putString(PREF_UNAME, UnameValue)
+        editor.putString(PREF_PASSWORD, PasswordValue)
+        editor.apply()
+    }
+
+    private fun loadPreferences() {
+
+        val settings = getSharedPreferences(
+            PREFS_NAME,
+            Context.MODE_PRIVATE
+        )
+
+        // Get value
+        UnameValue = settings.getString(PREF_UNAME, DefaultUnameValue)
+        PasswordValue = settings.getString(PREF_PASSWORD, DefaultPasswordValue)
+        val userNameField = findViewById<EditText>(R.id.editTextUserName)
+        val passwordField = findViewById<EditText>(R.id.editTextPassword)
+        userNameField.setText(UnameValue)
+        passwordField.setText(PasswordValue)
+    }
+
     private fun login(
         loginRequest: LoginRequest,
         context: Context
@@ -58,6 +108,7 @@ class MainActivity : AppCompatActivity() {
                         token = response.body()!!.token
                         ApiClient.saveToken(token)
                         appUser.id = JWTUtils().decode(token).toString()
+                        savePreferences()
                         val intent = Intent(context, MainMenuActivity::class.java)
                         startActivity(intent)
                     }
