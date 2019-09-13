@@ -18,7 +18,7 @@ class GameAdapter(
 ) :
     RecyclerView.Adapter<GameAdapter.InGameViewHolder>() {
 
-    var selectedPosition: Int = -1
+    var selectedPosition: Int = 0
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): InGameViewHolder {
         return InGameViewHolder(
