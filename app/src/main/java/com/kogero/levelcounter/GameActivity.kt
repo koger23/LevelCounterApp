@@ -2,6 +2,7 @@ package com.kogero.levelcounter
 
 import android.app.AlertDialog
 import android.content.Intent
+import android.os.AsyncTask
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -17,6 +18,8 @@ import com.kogero.levelcounter.model.Game
 import com.kogero.levelcounter.model.Gender
 import com.kogero.levelcounter.model.InGameUser
 import com.kogero.levelcounter.model.RecyclerViewClickListener
+import com.microsoft.signalr.HubConnection
+import com.microsoft.signalr.HubConnectionBuilder
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
@@ -36,11 +39,25 @@ class GameActivity : AppCompatActivity() {
     var game: Game? = null
     var playerList: ArrayList<InGameUser> = ArrayList()
     val adapter = GameAdapter(this, playerList)
+    lateinit var hubConnection: HubConnection
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game)
+
+        // SignalR
+        hubConnection = HubConnectionBuilder.create("http://05b9b6e3.ngrok.io/game").build()
+
+        hubConnection.on("Send", { message ->
+            println("Msg: $message")
+        }, String::class.java)
+
+        hubConnection.on("broadcastMessage", { message ->
+            println("Msg: $message")
+        }, String::class.java)
+
+        HubConnectionTask().execute(hubConnection)
 
 
         gameId = intent.getIntExtra("GAMEID", 1)
@@ -77,6 +94,8 @@ class GameActivity : AppCompatActivity() {
                         }
                         playerList[adapter.selectedPosition].Gender = playerGender
                         adapter.notifyDataSetChanged()
+                        updateGame()
+                        getGame(gameId)
                     }
                 })
         )
@@ -89,6 +108,12 @@ class GameActivity : AppCompatActivity() {
         val btnBonusPlus = findViewById<ImageButton>(R.id.btnBonusPlus)
         btnBonusPlus.setOnClickListener {
             increaseBonus(playerList[adapter.selectedPosition])
+            increaseLevel(playerList[adapter.selectedPosition])
+            try {
+                hubConnection.send("Send", playerList[adapter.selectedPosition].UserName)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
         val btnBonusMinus = findViewById<ImageButton>(R.id.btnBonusMin)
         btnBonusMinus.setOnClickListener {
@@ -97,6 +122,11 @@ class GameActivity : AppCompatActivity() {
         val btnLevelPlus = findViewById<ImageButton>(R.id.btnLevelPlus)
         btnLevelPlus.setOnClickListener {
             increaseLevel(playerList[adapter.selectedPosition])
+            try {
+                hubConnection.send("Send", playerList[adapter.selectedPosition].UserName)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
         val btnLevelMinus = findViewById<ImageButton>(R.id.btnLevelMin)
         btnLevelMinus.setOnClickListener {
@@ -128,8 +158,8 @@ class GameActivity : AppCompatActivity() {
     private fun increaseLevel(inGameUser: InGameUser) {
         if (adapter.selectedPosition != -1 && (checkUserIsHost() || inGameUser.UserId == AppUser.id)) {
             inGameUser.Level++
+            adapter.notifyDataSetChanged()
         }
-        adapter.notifyDataSetChanged()
     }
 
     private fun decreaseLevel(inGameUser: InGameUser) {
@@ -318,5 +348,18 @@ class GameActivity : AppCompatActivity() {
             }
         }
         t.start()
+    }
+
+    inner class HubConnectionTask : AsyncTask<HubConnection, Void, Void>() {
+
+        override fun onPreExecute() {
+            super.onPreExecute()
+        }
+
+        override fun doInBackground(vararg hubConnections: HubConnection): Void? {
+            val hubConnection = hubConnections[0]
+            hubConnection.start().blockingAwait()
+            return null
+        }
     }
 }
