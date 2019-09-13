@@ -2,6 +2,7 @@ package com.kogero.levelcounter
 
 import android.app.AlertDialog
 import android.content.Intent
+import android.os.AsyncTask
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -11,12 +12,15 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.gson.Gson
 import com.kogero.levelcounter.helpers.AppUser
 import com.kogero.levelcounter.helpers.TimeConverter
 import com.kogero.levelcounter.model.Game
 import com.kogero.levelcounter.model.Gender
 import com.kogero.levelcounter.model.InGameUser
 import com.kogero.levelcounter.model.RecyclerViewClickListener
+import com.microsoft.signalr.HubConnection
+import com.microsoft.signalr.HubConnectionBuilder
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
@@ -36,11 +40,30 @@ class LoadedGameActivity : AppCompatActivity() {
     var game: Game? = null
     var playerList: ArrayList<InGameUser> = ArrayList()
     val adapter = GameAdapter(this, playerList)
+    private val gson = Gson()
+    lateinit var hubConnection: HubConnection
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game)
+
+        // SignalR
+        hubConnection = HubConnectionBuilder.create("http://05b9b6e3.ngrok.io/game").build()
+
+        hubConnection.on("Send", { game ->
+            println("Msg: $game")
+        }, String::class.java)
+
+        hubConnection.on("broadcastMessage", { message ->
+            println("Recieved: $message")
+            val gameFromMsg = gson.fromJson(message, Game::class.java)
+            this@LoadedGameActivity.runOnUiThread {
+                updateGame(gameFromMsg)
+            }
+        }, String::class.java)
+
+        HubConnectionTask().execute(hubConnection)
 
 
         gameId = intent.getIntExtra("GAMEID", 1)
@@ -77,6 +100,7 @@ class LoadedGameActivity : AppCompatActivity() {
                         }
                         playerList[adapter.selectedPosition].Gender = playerGender
                         adapter.notifyDataSetChanged()
+                        sendGameStateWithSignalR()
                     }
                 })
         )
@@ -104,6 +128,25 @@ class LoadedGameActivity : AppCompatActivity() {
         }
     }
 
+    private fun sendGameStateWithSignalR() {
+        try {
+            hubConnection.send("Send", gson.toJson(game))
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun updateGame(fresherGame: Game) {
+        game = fresherGame
+        if (game != null && game?.inGameUsers!!.isNotEmpty()) {
+            playerList.clear()
+        }
+        for (player in fresherGame.inGameUsers) {
+            playerList.add(player)
+        }
+        adapter.notifyDataSetChanged()
+    }
+
     private fun checkUserIsHost(): Boolean {
         if (AppUser.id == game!!.hostingUserId) {
             return true
@@ -115,6 +158,7 @@ class LoadedGameActivity : AppCompatActivity() {
         if (adapter.selectedPosition != -1 && (checkUserIsHost() || inGameUser.UserId == AppUser.id)) {
             inGameUser.Bonus++
             adapter.notifyDataSetChanged()
+            sendGameStateWithSignalR()
         }
     }
 
@@ -122,20 +166,23 @@ class LoadedGameActivity : AppCompatActivity() {
         if (adapter.selectedPosition != -1 && inGameUser.Bonus > 0 && (checkUserIsHost() || inGameUser.UserId == AppUser.id)) {
             inGameUser.Bonus--
             adapter.notifyDataSetChanged()
+            sendGameStateWithSignalR()
         }
     }
 
     private fun increaseLevel(inGameUser: InGameUser) {
         if (adapter.selectedPosition != -1 && (checkUserIsHost() || inGameUser.UserId == AppUser.id)) {
             inGameUser.Level++
+            adapter.notifyDataSetChanged()
+            sendGameStateWithSignalR()
         }
-        adapter.notifyDataSetChanged()
     }
 
     private fun decreaseLevel(inGameUser: InGameUser) {
         if (adapter.selectedPosition != -1 && inGameUser.Level > 1 && (checkUserIsHost() || inGameUser.UserId == AppUser.id)) {
             inGameUser.Level--
             adapter.notifyDataSetChanged()
+            sendGameStateWithSignalR()
         }
     }
 
@@ -297,5 +344,18 @@ class LoadedGameActivity : AppCompatActivity() {
             }
         }
         t.start()
+    }
+
+    inner class HubConnectionTask : AsyncTask<HubConnection, Void, Void>() {
+
+        override fun onPreExecute() {
+            super.onPreExecute()
+        }
+
+        override fun doInBackground(vararg hubConnections: HubConnection): Void? {
+            val hubConnection = hubConnections[0]
+            hubConnection.start().blockingAwait()
+            return null
+        }
     }
 }

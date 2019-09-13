@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.gson.Gson
 import com.kogero.levelcounter.helpers.AppUser
 import com.kogero.levelcounter.helpers.TimeConverter
 import com.kogero.levelcounter.model.Game
@@ -39,6 +40,7 @@ class GameActivity : AppCompatActivity() {
     var game: Game? = null
     var playerList: ArrayList<InGameUser> = ArrayList()
     val adapter = GameAdapter(this, playerList)
+    private val gson = Gson()
     lateinit var hubConnection: HubConnection
 
 
@@ -49,12 +51,16 @@ class GameActivity : AppCompatActivity() {
         // SignalR
         hubConnection = HubConnectionBuilder.create("http://05b9b6e3.ngrok.io/game").build()
 
-        hubConnection.on("Send", { message ->
-            println("Msg: $message")
+        hubConnection.on("Send", { game ->
+            println("Msg: $game")
         }, String::class.java)
 
         hubConnection.on("broadcastMessage", { message ->
-            println("Msg: $message")
+            println("Recieved: $message")
+            val gameFromMsg = gson.fromJson(message, Game::class.java)
+            this@GameActivity.runOnUiThread {
+                updateGame(gameFromMsg)
+            }
         }, String::class.java)
 
         HubConnectionTask().execute(hubConnection)
@@ -94,8 +100,7 @@ class GameActivity : AppCompatActivity() {
                         }
                         playerList[adapter.selectedPosition].Gender = playerGender
                         adapter.notifyDataSetChanged()
-                        updateGame()
-                        getGame(gameId)
+                        sendGameStateWithSignalR()
                     }
                 })
         )
@@ -108,12 +113,6 @@ class GameActivity : AppCompatActivity() {
         val btnBonusPlus = findViewById<ImageButton>(R.id.btnBonusPlus)
         btnBonusPlus.setOnClickListener {
             increaseBonus(playerList[adapter.selectedPosition])
-            increaseLevel(playerList[adapter.selectedPosition])
-            try {
-                hubConnection.send("Send", playerList[adapter.selectedPosition].UserName)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
         }
         val btnBonusMinus = findViewById<ImageButton>(R.id.btnBonusMin)
         btnBonusMinus.setOnClickListener {
@@ -122,16 +121,30 @@ class GameActivity : AppCompatActivity() {
         val btnLevelPlus = findViewById<ImageButton>(R.id.btnLevelPlus)
         btnLevelPlus.setOnClickListener {
             increaseLevel(playerList[adapter.selectedPosition])
-            try {
-                hubConnection.send("Send", playerList[adapter.selectedPosition].UserName)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
         }
         val btnLevelMinus = findViewById<ImageButton>(R.id.btnLevelMin)
         btnLevelMinus.setOnClickListener {
             decreaseLevel(playerList[adapter.selectedPosition])
         }
+    }
+
+    private fun sendGameStateWithSignalR() {
+        try {
+            hubConnection.send("Send", gson.toJson(game))
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun updateGame(fresherGame: Game) {
+        game = fresherGame
+        if (game != null && game?.inGameUsers!!.isNotEmpty()) {
+            playerList.clear()
+        }
+        for (player in fresherGame.inGameUsers) {
+            playerList.add(player)
+        }
+        adapter.notifyDataSetChanged()
     }
 
     private fun checkUserIsHost(): Boolean {
@@ -145,6 +158,7 @@ class GameActivity : AppCompatActivity() {
         if (adapter.selectedPosition != -1 && (checkUserIsHost() || inGameUser.UserId == AppUser.id)) {
             inGameUser.Bonus++
             adapter.notifyDataSetChanged()
+            sendGameStateWithSignalR()
         }
     }
 
@@ -152,6 +166,7 @@ class GameActivity : AppCompatActivity() {
         if (adapter.selectedPosition != -1 && inGameUser.Bonus > 0 && (checkUserIsHost() || inGameUser.UserId == AppUser.id)) {
             inGameUser.Bonus--
             adapter.notifyDataSetChanged()
+            sendGameStateWithSignalR()
         }
     }
 
@@ -159,6 +174,7 @@ class GameActivity : AppCompatActivity() {
         if (adapter.selectedPosition != -1 && (checkUserIsHost() || inGameUser.UserId == AppUser.id)) {
             inGameUser.Level++
             adapter.notifyDataSetChanged()
+            sendGameStateWithSignalR()
         }
     }
 
@@ -166,6 +182,7 @@ class GameActivity : AppCompatActivity() {
         if (adapter.selectedPosition != -1 && inGameUser.Level > 1 && (checkUserIsHost() || inGameUser.UserId == AppUser.id)) {
             inGameUser.Level--
             adapter.notifyDataSetChanged()
+            sendGameStateWithSignalR()
         }
     }
 
@@ -188,8 +205,8 @@ class GameActivity : AppCompatActivity() {
                         for (player in game!!.inGameUsers) {
                             playerList.add(player)
                         }
+                        adapter.notifyDataSetChanged()
                     }
-                    adapter.notifyDataSetChanged()
                 }
             }
 
@@ -275,7 +292,7 @@ class GameActivity : AppCompatActivity() {
         })
     }
 
-    private fun updateGame() {
+    private fun updateGameOnServer() {
         val call: Call<ResponseBody> = ApiClient.getClient.updateGame(game)
         call.enqueue(object : Callback<ResponseBody> {
             override fun onResponse(
