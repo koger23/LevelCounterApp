@@ -15,6 +15,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.kogero.levelcounter.helpers.AppUser
 import com.kogero.levelcounter.helpers.TimeConverter
+import com.kogero.levelcounter.helpers.TimeConverter.convertDateToLong
+import com.kogero.levelcounter.helpers.TimeConverter.fromStringToDate
 import com.kogero.levelcounter.model.Game
 import com.kogero.levelcounter.model.Gender
 import com.kogero.levelcounter.model.InGameUser
@@ -52,11 +54,9 @@ class LoadedGameActivity : AppCompatActivity() {
         hubConnection = HubConnectionBuilder.create("http://05b9b6e3.ngrok.io/game").build()
 
         hubConnection.on("Send", { game ->
-            println("Msg: $game")
         }, String::class.java)
 
         hubConnection.on("broadcastMessage", { message ->
-            println("Recieved: $message")
             val gameFromMsg = gson.fromJson(message, Game::class.java)
             this@LoadedGameActivity.runOnUiThread {
                 updateGame(gameFromMsg)
@@ -136,15 +136,37 @@ class LoadedGameActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateGame(fresherGame: Game) {
-        game = fresherGame
+    private fun updateGame(refreshGame: Game) {
+        if (!refreshGame.isRunning && refreshGame.id == gameId) {
+            hostExitedMsq()
+        }
+        game = refreshGame
         if (game != null && game?.inGameUsers!!.isNotEmpty()) {
             playerList.clear()
         }
-        for (player in fresherGame.inGameUsers) {
+        for (player in refreshGame.inGameUsers) {
             playerList.add(player)
         }
+        val gameStartMills = convertDateToLong(fromStringToDate(game!!.dateTime,
+            "yyyy-MM-dd'T'HH:mm:ss"))
+        startMills = gameStartMills
         adapter.notifyDataSetChanged()
+    }
+
+
+    private fun hostExitedMsq() {
+        val i = Intent(this, MainMenuActivity::class.java)
+        i.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NO_HISTORY
+        AlertDialog.Builder(this)
+            .setIcon(android.R.drawable.ic_dialog_alert)
+            .setTitle("Connection lost with the Host.")
+            .setMessage("The host closed the game.")
+            .setNeutralButton("OK") { _, _ ->
+                gameIsRunning = false
+                startActivity(i)
+                finish()
+            }
+            .show()
     }
 
     private fun checkUserIsHost(): Boolean {
@@ -336,10 +358,11 @@ class LoadedGameActivity : AppCompatActivity() {
                             if (game != null) {
                                 game!!.time = totalSecs
                             }
-                            clock.text = TimeConverter.convert(totalSecs)
+                            clock.text = TimeConverter.convertTimeFromLong(totalSecs)
                         }
                     }
                 } catch (e: InterruptedException) {
+                    println(e.stackTrace)
                 }
             }
         }
