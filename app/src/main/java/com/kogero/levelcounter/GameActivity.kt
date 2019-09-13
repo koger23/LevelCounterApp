@@ -52,11 +52,9 @@ class GameActivity : AppCompatActivity() {
         hubConnection = HubConnectionBuilder.create("http://05b9b6e3.ngrok.io/game").build()
 
         hubConnection.on("Send", { game ->
-            println("Msg: $game")
         }, String::class.java)
 
         hubConnection.on("broadcastMessage", { message ->
-            println("Recieved: $message")
             val gameFromMsg = gson.fromJson(message, Game::class.java)
             this@GameActivity.runOnUiThread {
                 updateGame(gameFromMsg)
@@ -64,7 +62,6 @@ class GameActivity : AppCompatActivity() {
         }, String::class.java)
 
         HubConnectionTask().execute(hubConnection)
-
 
         gameId = intent.getIntExtra("GAMEID", 1)
 
@@ -136,15 +133,25 @@ class GameActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateGame(fresherGame: Game) {
-        game = fresherGame
-        if (game != null && game?.inGameUsers!!.isNotEmpty()) {
-            playerList.clear()
+    private fun updateGame(refreshGame: Game) {
+        if (refreshGame.id == gameId) {
+            game = refreshGame
+            if (game != null && game?.inGameUsers!!.isNotEmpty()) {
+                playerList.clear()
+                totalSecs = game!!.time
+            }
+            for (player in refreshGame.inGameUsers) {
+                playerList.add(player)
+            }
+            val gameStartMills = TimeConverter.convertDateToLong(
+                TimeConverter.fromStringToDate(
+                    game!!.dateTime,
+                    "yyyy-MM-dd'T'HH:mm:ss"
+                )
+            )
+            startMills = gameStartMills
+            adapter.notifyDataSetChanged()
         }
-        for (player in fresherGame.inGameUsers) {
-            playerList.add(player)
-        }
-        adapter.notifyDataSetChanged()
     }
 
     private fun checkUserIsHost(): Boolean {
@@ -256,12 +263,16 @@ class GameActivity : AppCompatActivity() {
             .setTitle("Quit")
             .setMessage("Are you sure to quit?")
             .setPositiveButton("Save & Quit") { _, _ ->
+                game!!.isRunning = false
                 saveGame()
+                sendGameStateWithSignalR()
                 startActivity(i)
                 finish()
             }
             .setNeutralButton("Quit") { _, _ ->
+                game!!.isRunning = false
                 quitGame()
+                sendGameStateWithSignalR()
                 startActivity(i)
                 finish()
             }
@@ -357,14 +368,21 @@ class GameActivity : AppCompatActivity() {
                             if (game != null) {
                                 game!!.time = totalSecs
                             }
-                            clock.text = TimeConverter.convert(totalSecs)
+                            if (totalSecs % 60 == 0L) {
+                                updateGameOnServer()
+                            }
+                            clock.text = TimeConverter.convertTimeFromLong(totalSecs)
                         }
                     }
                 } catch (e: InterruptedException) {
+                    println(e.stackTrace)
                 }
             }
         }
         t.start()
+        if (!gameIsRunning) {
+            t.interrupt()
+        }
     }
 
     inner class HubConnectionTask : AsyncTask<HubConnection, Void, Void>() {
