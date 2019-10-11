@@ -9,7 +9,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.kogero.levelcounter.R
-import com.kogero.levelcounter.model.UserSelectionModel
+import com.kogero.levelcounter.models.UserSelectionModel
 import kotlinx.android.synthetic.main.userselection_item.view.*
 
 class NewGameSelectionAdapter(

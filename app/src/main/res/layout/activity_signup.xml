@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/munchkinYellow"
-    tools:context=".SignUpActivity">
+    tools:context=".activites.SignUpActivity">
 
     <TextView
         android:id="@+id/textViewRegisterTitle"

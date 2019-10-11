@@ -3,8 +3,8 @@ package com.kogero.levelcounter.helpers
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
-import com.kogero.levelcounter.model.Gender
-import com.kogero.levelcounter.model.InGameUser
+import com.kogero.levelcounter.models.Gender
+import com.kogero.levelcounter.models.InGameUser
 import java.lang.reflect.Type
 
 class InGameUserDeserializer : JsonDeserializer<InGameUser> {
