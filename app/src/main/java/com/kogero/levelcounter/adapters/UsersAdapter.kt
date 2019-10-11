@@ -1,4 +1,4 @@
-package com.kogero.levelcounter
+package com.kogero.levelcounter.adapters
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -8,6 +8,7 @@ import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import com.kogero.levelcounter.R
 import com.kogero.levelcounter.model.UserListViewModel
 import kotlinx.android.synthetic.main.user_list_item.view.*
 

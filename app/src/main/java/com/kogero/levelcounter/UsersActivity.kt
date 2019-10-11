@@ -6,17 +6,15 @@ import android.os.Bundle
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.kogero.levelcounter.adapters.UsersAdapter
 import com.kogero.levelcounter.model.RecyclerViewClickListener
 import com.kogero.levelcounter.model.Statistics
 import com.kogero.levelcounter.model.UserListViewModel
-import com.kogero.levelcounter.model.responses.UserShortResponse
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.io.IOException
 
 
 open class UsersActivity : AppCompatActivity(), AdapterView.OnItemClickListener {

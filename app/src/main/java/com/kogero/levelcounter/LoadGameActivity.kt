@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.kogero.levelcounter.adapters.LoadGameAdapter
 import com.kogero.levelcounter.model.Game
 import com.kogero.levelcounter.model.RecyclerViewClickListener
 import retrofit2.Call

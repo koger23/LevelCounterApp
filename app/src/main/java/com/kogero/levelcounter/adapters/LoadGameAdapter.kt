@@ -1,4 +1,4 @@
-package com.kogero.levelcounter
+package com.kogero.levelcounter.adapters
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.kogero.levelcounter.R
 import com.kogero.levelcounter.helpers.TimeConverter
 import com.kogero.levelcounter.model.Game
 import kotlinx.android.synthetic.main.loadgame_list_item.view.*

@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.kogero.levelcounter.adapters.PendingRequestAdapter
 import com.kogero.levelcounter.model.RecyclerViewClickListener
 import com.kogero.levelcounter.model.UserListViewModel
 import kotlinx.android.synthetic.main.pending_request_item.*

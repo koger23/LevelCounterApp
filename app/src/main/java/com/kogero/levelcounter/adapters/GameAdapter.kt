@@ -1,4 +1,4 @@
-package com.kogero.levelcounter
+package com.kogero.levelcounter.adapters
 
 import android.content.Context
 import android.graphics.Color
@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
+import com.kogero.levelcounter.R
 import com.kogero.levelcounter.model.Gender
 import com.kogero.levelcounter.model.InGameUser
 import kotlinx.android.synthetic.main.ingame_listitem.view.*

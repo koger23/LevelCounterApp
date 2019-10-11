@@ -2,21 +2,18 @@ package com.kogero.levelcounter
 
 import android.content.Context
 import android.content.Intent
-import android.media.Image
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ImageButton
-import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.kogero.levelcounter.adapters.FriendsAdapter
 import com.kogero.levelcounter.model.RecyclerViewClickListener
 import com.kogero.levelcounter.model.Statistics
 import com.kogero.levelcounter.model.UserListViewModel
-import com.kogero.levelcounter.model.responses.UserShortResponse
-import kotlinx.android.synthetic.main.actitvity_playerstat.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
