@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
-    tools:context=".FriendsActivity">
+    tools:context=".activites.FriendsActivity">
 
     <LinearLayout
         android:layout_width="match_parent"

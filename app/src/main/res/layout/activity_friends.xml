@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="right"
         android:background="@color/munchkinBrown"
-        tools:context=".FriendsActivity">
+        tools:context=".activites.FriendsActivity">
 
         <ImageButton
             android:id="@+id/btnSearch"

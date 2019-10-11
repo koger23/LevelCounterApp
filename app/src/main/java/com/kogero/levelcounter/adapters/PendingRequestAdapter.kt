@@ -8,7 +8,7 @@ import android.widget.ImageButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.kogero.levelcounter.R
-import com.kogero.levelcounter.model.UserListViewModel
+import com.kogero.levelcounter.models.UserListViewModel
 import kotlinx.android.synthetic.main.pending_request_item.view.*
 import kotlinx.android.synthetic.main.user_list_item.view.friendName
 

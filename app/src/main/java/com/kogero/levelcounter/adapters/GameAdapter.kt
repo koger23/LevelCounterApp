@@ -9,8 +9,8 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.kogero.levelcounter.R
-import com.kogero.levelcounter.model.Gender
-import com.kogero.levelcounter.model.InGameUser
+import com.kogero.levelcounter.models.Gender
+import com.kogero.levelcounter.models.InGameUser
 import kotlinx.android.synthetic.main.ingame_listitem.view.*
 
 class GameAdapter(

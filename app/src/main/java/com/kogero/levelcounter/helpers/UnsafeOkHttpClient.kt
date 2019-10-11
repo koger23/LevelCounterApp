@@ -1,6 +1,6 @@
 package com.kogero.levelcounter.helpers
 
-import com.kogero.levelcounter.ApiClient
+import com.kogero.levelcounter.api.ApiClient
 import okhttp3.OkHttpClient
 import java.security.cert.CertificateException
 import javax.net.ssl.SSLContext

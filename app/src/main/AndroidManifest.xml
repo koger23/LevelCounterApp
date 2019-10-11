@@ -22,18 +22,19 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MainMenuActivity" />
-        <activity android:name=".SignUpActivity" />
-        <activity android:name=".FriendsActivity" />
-        <activity android:name=".StatisticsActivity" />
-        <activity android:name=".UsersActivity" />
-        <activity android:name=".PendingRequestActivity" />
-        <activity android:name=".PersonalStatisticsActivity" />
-        <activity android:name=".NewGameSelectionActivity" />
-        <activity android:name=".GameActivity" />
-        <activity android:name=".LoadGameActivity" />
-        <activity android:name=".JoinGameActivity" />
-        <activity android:name=".LoadedGameActivity" />
+        <activity android:name=".activites.MainMenuActivity" />
+        <activity android:name=".activites.SignUpActivity" />
+        <activity android:name=".activites.FriendsActivity" />
+        <activity android:name=".activites.StatisticsActivity" />
+        <activity android:name=".activites.UsersActivity" />
+        <activity android:name=".activites.PendingRequestActivity" />
+        <activity android:name=".activites.PersonalStatisticsActivity" />
+        <activity android:name=".activites.NewGameSelectionActivity" />
+        <activity android:name=".activites.GameActivity" />
+        <activity android:name=".activites.LoadGameActivity" />
+        <activity android:name=".activites.JoinGameActivity" />
+        <activity android:name=".activites.LoadedGameActivity" />
+        <activity android:name=".activites.LoginActivity" />
     </application>
 
 </manifest>

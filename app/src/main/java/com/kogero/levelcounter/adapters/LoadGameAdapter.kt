@@ -8,7 +8,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.kogero.levelcounter.R
 import com.kogero.levelcounter.helpers.TimeConverter
-import com.kogero.levelcounter.model.Game
+import com.kogero.levelcounter.models.Game
 import kotlinx.android.synthetic.main.loadgame_list_item.view.*
 import java.text.SimpleDateFormat
 import java.util.*
