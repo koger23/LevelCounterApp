@@ -60,8 +60,9 @@ class JoinGameActivity : AppCompatActivity() {
                 ).show()
                 val game = response.body()
                 if (game != null) {
-                    val intent = Intent(this@JoinGameActivity, LoadedGameActivity::class.java)
+                    val intent = Intent(this@JoinGameActivity, GameActivity::class.java)
                     intent.putExtra("GAMEID", game.id)
+                    intent.putExtra("JOIN", 1)
                     startActivity(intent)
                 }
             }

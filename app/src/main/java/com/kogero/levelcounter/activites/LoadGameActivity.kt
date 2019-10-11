@@ -36,7 +36,9 @@ class LoadGameActivity : AppCompatActivity() {
                     override fun onClick(view: View, position: Int) {
                         val selectedGame = gameList[position]
                         val gameId = selectedGame.id
-                        loadGame(gameId)
+                        val intent = Intent(this@LoadGameActivity, GameActivity::class.java)
+                        intent.putExtra("GAMEID", gameId)
+                        startActivity(intent)
                     }
 
                     override fun onLongClick(view: View, position: Int) {
@@ -44,37 +46,6 @@ class LoadGameActivity : AppCompatActivity() {
                 })
         )
         getGames()
-    }
-
-    fun loadGame(gameId: Int) {
-        val call: Call<Game> = ApiClient.getClient.startGame(gameId)
-        call.enqueue(object : Callback<Game> {
-            override fun onResponse(
-                call: Call<Game>,
-                response: Response<Game>
-            ) {
-                Toast.makeText(
-                    this@LoadGameActivity,
-                    "Code: ${response.code()}",
-                    Toast.LENGTH_SHORT
-                ).show()
-                val game = response.body()
-                if (game != null) {
-                    val intent = Intent(this@LoadGameActivity, GameActivity::class.java)
-                    intent.putExtra("GAMEID", game.id)
-                    startActivity(intent)
-                }
-            }
-
-            override fun onFailure(call: Call<Game>, t: Throwable) {
-                Toast.makeText(
-                    this@LoadGameActivity,
-                    "Could not connect to the server",
-                    Toast.LENGTH_SHORT
-                )
-                    .show()
-            }
-        })
     }
 
     private fun getGames() {

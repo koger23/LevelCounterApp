@@ -12,19 +12,20 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
-import com.kogero.levelcounter.api.ApiClient
 import com.kogero.levelcounter.R
-import com.kogero.levelcounter.listeners.RecyclerViewTouchListener
 import com.kogero.levelcounter.adapters.GameAdapter
+import com.kogero.levelcounter.api.ApiClient
 import com.kogero.levelcounter.helpers.AppUser
-import com.kogero.levelcounter.helpers.HubConnectionTask
 import com.kogero.levelcounter.helpers.TimeConverter
+import com.kogero.levelcounter.hub.HubConnectionTask
+import com.kogero.levelcounter.listeners.RecyclerViewTouchListener
 import com.kogero.levelcounter.models.Game
 import com.kogero.levelcounter.models.Gender
 import com.kogero.levelcounter.models.InGameUser
 import com.kogero.levelcounter.models.RecyclerViewClickListener
 import com.microsoft.signalr.HubConnection
 import com.microsoft.signalr.HubConnectionBuilder
+import kotlinx.android.synthetic.main.activity_game.*
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
@@ -38,10 +39,12 @@ class GameActivity : AppCompatActivity() {
     internal var additionalSecs: Long = 0
     private var round = 1
     private var isFirstStart = true
-    var gameId: Int = 0
+    private var addedToGroup = false
+    private var gameId: Int = 0
     var gameIsRunning = true
 
     var game: Game? = null
+    var joinGame = 0
     var playerList: ArrayList<InGameUser> = ArrayList()
     val adapter = GameAdapter(this, playerList)
     private val gson = Gson()
@@ -52,19 +55,23 @@ class GameActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game)
 
-        // SignalR
         hubConnection = HubConnectionBuilder.create("${ApiClient.SITE_URL}game").build()
         hubConnection.on("Send", {}, String::class.java)
         hubConnection.on("broadcastMessage", { message ->
             val gameFromMsg = gson.fromJson(message, Game::class.java)
             this@GameActivity.runOnUiThread {
-                updateGame(gameFromMsg)
+                if (gameFromMsg.senderId != AppUser.id) {
+                    updateGame(gameFromMsg)
+                }
             }
         }, String::class.java)
 
-        HubConnectionTask().execute(hubConnection)
+        val connection = HubConnectionTask().execute(hubConnection)
 
         gameId = intent.getIntExtra("GAMEID", 1)
+        joinGame = intent.getIntExtra("JOIN", 0)
+
+        getGame(gameId)
 
         val tvRound = findViewById<TextView>(R.id.tvRound)
         tvRound.text = "Round $round"
@@ -73,9 +80,8 @@ class GameActivity : AppCompatActivity() {
         btnNextRound.setOnClickListener {
             round++
             tvRound.text = "Round $round"
+            sendGameStateWithSignalR()
         }
-
-        getGame(gameId)
 
         val recyclerView = findViewById<RecyclerView>(R.id.rv_playerlist)
         recyclerView.layoutManager = LinearLayoutManager(this@GameActivity)
@@ -111,34 +117,54 @@ class GameActivity : AppCompatActivity() {
         val btnBonusPlus = findViewById<ImageButton>(R.id.btnBonusPlus)
         btnBonusPlus.setOnClickListener {
             increaseBonus(playerList[adapter.selectedPosition])
-            print(playerList[adapter.selectedPosition].Bonus)
         }
         val btnBonusMinus = findViewById<ImageButton>(R.id.btnBonusMin)
         btnBonusMinus.setOnClickListener {
             decreaseBonus(playerList[adapter.selectedPosition])
-            print(playerList[adapter.selectedPosition].Bonus)
         }
         val btnLevelPlus = findViewById<ImageButton>(R.id.btnLevelPlus)
         btnLevelPlus.setOnClickListener {
             increaseLevel(playerList[adapter.selectedPosition])
-            print(playerList[adapter.selectedPosition].Level)
         }
         val btnLevelMinus = findViewById<ImageButton>(R.id.btnLevelMin)
         btnLevelMinus.setOnClickListener {
             decreaseLevel(playerList[adapter.selectedPosition])
-            print(playerList[adapter.selectedPosition].Level)
         }
     }
 
+    private fun updateRounds(rounds: Int) {
+        round = rounds
+        tvRound.text = "Round $round"
+    }
+
     private fun sendGameStateWithSignalR() {
+        if (!addedToGroup) {
+            try {
+                hubConnection.send("AddToGroup", gameId, AppUser.id)
+                addedToGroup = false
+            } catch (e: RuntimeException) {
+                Toast.makeText(this@GameActivity, "Socket connection is not active.", Toast.LENGTH_SHORT)
+                    .show()
+            }
+        }
         try {
-            hubConnection.send("Send", gson.toJson(game))
+            game!!.senderId = AppUser.id
+            game!!.rounds = round
+            try {
+                hubConnection.send("Send", gson.toJson(game), gameId)
+            } catch (e: RuntimeException) {
+                Toast.makeText(this@GameActivity, "Socket connection is not active.", Toast.LENGTH_SHORT)
+                    .show()
+            }
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
     private fun updateGame(refreshGame: Game) {
+        if (!refreshGame.isRunning && refreshGame.id == gameId) {
+            hostExitedMsq()
+        }
         if (refreshGame.id == gameId) {
             game = refreshGame
             if (game != null && game?.inGameUsers!!.isNotEmpty()) {
@@ -154,6 +180,7 @@ class GameActivity : AppCompatActivity() {
                     "yyyy-MM-dd'T'HH:mm:ss"
                 )
             )
+            updateRounds(refreshGame.rounds)
             startMills = gameStartMills
             adapter.notifyDataSetChanged()
         }
@@ -199,7 +226,12 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun getGame(gameId: Int) {
-        val call: Call<Game> = ApiClient.getClient.startGame(gameId)
+        val call: Call<Game> = if (joinGame == 1) {
+            ApiClient.getClient.joinGame(gameId)
+        } else {
+            ApiClient.getClient.startGame(gameId)
+        }
+
         call.enqueue(object : Callback<Game> {
             override fun onResponse(
                 call: Call<Game>,
@@ -212,6 +244,10 @@ class GameActivity : AppCompatActivity() {
                 ).show()
                 if (response.code() == 200) {
                     game = response.body()
+                    updateRounds(game!!.rounds)
+                    if (game!!.hostingUserId != AppUser.id) {
+                        btnNextRound.visibility = View.INVISIBLE
+                    }
                     if (game!!.inGameUsers.isNotEmpty()) {
                         playerList.clear()
                         for (player in game!!.inGameUsers) {
@@ -285,6 +321,22 @@ class GameActivity : AppCompatActivity() {
             .show()
     }
 
+
+    private fun hostExitedMsq() {
+        val i = Intent(this, MainMenuActivity::class.java)
+        i.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NO_HISTORY
+        AlertDialog.Builder(this)
+            .setIcon(android.R.drawable.ic_dialog_alert)
+            .setTitle("Connection lost with the Host.")
+            .setMessage("The host closed the game.")
+            .setNeutralButton("OK") { _, _ ->
+                gameIsRunning = false
+                startActivity(i)
+                finish()
+            }
+            .show()
+    }
+
     private fun saveGame() {
         val call: Call<ResponseBody> = ApiClient.getClient.saveGame(game)
         call.enqueue(object : Callback<ResponseBody> {
@@ -309,19 +361,13 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun updateGameOnServer() {
+        game!!.rounds = round
         val call: Call<ResponseBody> = ApiClient.getClient.updateGame(game)
         call.enqueue(object : Callback<ResponseBody> {
             override fun onResponse(
                 call: Call<ResponseBody>,
                 response: Response<ResponseBody>
             ) {
-                if (response.code() == 200) {
-                    Toast.makeText(
-                        this@GameActivity,
-                        "Game saved.",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
             }
 
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
@@ -336,7 +382,7 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun quitGame() {
-        val call: Call<ResponseBody> = ApiClient.getClient.quitGame(game!!.id)
+        val call: Call<ResponseBody> = ApiClient.getClient.quitGame(game!!)
         call.enqueue(object : Callback<ResponseBody> {
             override fun onResponse(
                 call: Call<ResponseBody>,
@@ -373,7 +419,8 @@ class GameActivity : AppCompatActivity() {
                             if (game != null) {
                                 game!!.time = totalSecs
                             }
-                            if (totalSecs % 60 == 0L) {
+                            if (totalSecs % 60 == 0L && game!!.hostingUserId == AppUser.id) {
+                                game!!.senderId = AppUser.id
                                 updateGameOnServer()
                             }
                             clock.text = TimeConverter.convertTimeFromLong(totalSecs)

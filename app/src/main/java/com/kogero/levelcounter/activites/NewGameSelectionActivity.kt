@@ -120,6 +120,7 @@ class NewGameSelectionActivity : AppCompatActivity() {
                     if (game != null) {
                         val intent = Intent(this@NewGameSelectionActivity, GameActivity::class.java)
                         intent.putExtra("GAMEID", game.id)
+                        intent.putExtra("JOIN", 0)
                         progressBar!!.visibility = View.INVISIBLE
                         startActivity(intent)
                     } else {
