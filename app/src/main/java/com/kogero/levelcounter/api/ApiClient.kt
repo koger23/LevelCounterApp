@@ -10,8 +10,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 import com.kogero.levelcounter.helpers.UnsafeOkHttpClient
 
 
-
-
 object ApiClient {
 
     var token: String = ""
@@ -22,7 +20,7 @@ object ApiClient {
 
     var okHttpClient = UnsafeOkHttpClient.unsafeOkHttpClient
 
-    const val SITE_URL = "https://72f02821.ngrok.io/"
+    const val SITE_URL = "https://a23c157d.ngrok.io/"
     private const val BASE_URL = "${SITE_URL}api/"
     val getClient: ApiInterface
         get() {
@@ -30,13 +28,7 @@ object ApiClient {
                 .registerTypeAdapter(InGameUser::class.java, InGameUserDeserializer())
                 .setLenient()
                 .create()
-
             val client = okHttpClient
-
-//            val client = OkHttpClient.Builder()
-//                .addInterceptor(LevelCounterInterceptor())
-//                .build()
-
             val retrofit = Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .client(client)
@@ -51,8 +43,6 @@ object ApiClient {
             var request = chain.request()
 
             if (request.header("No-Authentication") == null) {
-                //val token = getTokenFromSharedPreference();
-                //or use Token Function
                 if (token.isNotEmpty()) {
                     request = request.newBuilder()
                         .addHeader("Authorization", "Bearer $token")

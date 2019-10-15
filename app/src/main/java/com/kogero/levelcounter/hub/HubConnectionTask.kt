@@ -1,4 +1,4 @@
-package com.kogero.levelcounter.helpers
+package com.kogero.levelcounter.hub
 
 import android.os.AsyncTask
 import com.microsoft.signalr.HubConnection

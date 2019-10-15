@@ -11,5 +11,7 @@ data class Game (
     @SerializedName("inGameUsers")
     var inGameUsers: List<InGameUser> = ArrayList(),
     var hostingUserId: String,
-    var isRunning: Boolean = false
+    var isRunning: Boolean = false,
+    var senderId: String = "",
+    var rounds: Int = 1
 ) : Serializable
