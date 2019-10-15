@@ -143,7 +143,11 @@ class GameActivity : AppCompatActivity() {
                 hubConnection.send("AddToGroup", gameId, AppUser.id)
                 addedToGroup = false
             } catch (e: RuntimeException) {
-                Toast.makeText(this@GameActivity, "Socket connection is not active.", Toast.LENGTH_SHORT)
+                Toast.makeText(
+                    this@GameActivity,
+                    "Socket connection is not active.",
+                    Toast.LENGTH_SHORT
+                )
                     .show()
             }
         }
@@ -153,7 +157,11 @@ class GameActivity : AppCompatActivity() {
             try {
                 hubConnection.send("Send", gson.toJson(game), gameId)
             } catch (e: RuntimeException) {
-                Toast.makeText(this@GameActivity, "Socket connection is not active.", Toast.LENGTH_SHORT)
+                Toast.makeText(
+                    this@GameActivity,
+                    "Socket connection is not active.",
+                    Toast.LENGTH_SHORT
+                )
                     .show()
             }
         } catch (e: Exception) {
@@ -237,23 +245,30 @@ class GameActivity : AppCompatActivity() {
                 call: Call<Game>,
                 response: Response<Game>
             ) {
-                Toast.makeText(
-                    this@GameActivity,
-                    "Code: ${response.code()}",
-                    Toast.LENGTH_SHORT
-                ).show()
-                if (response.code() == 200) {
-                    game = response.body()
-                    updateRounds(game!!.rounds)
-                    if (game!!.hostingUserId != AppUser.id) {
-                        btnNextRound.visibility = View.INVISIBLE
-                    }
-                    if (game!!.inGameUsers.isNotEmpty()) {
-                        playerList.clear()
-                        for (player in game!!.inGameUsers) {
-                            playerList.add(player)
+                when {
+                    response.code() == 200 -> {
+                        game = response.body()
+                        updateRounds(game!!.rounds)
+                        if (game!!.hostingUserId != AppUser.id) {
+                            btnNextRound.visibility = View.INVISIBLE
                         }
-                        adapter.notifyDataSetChanged()
+                        if (game!!.inGameUsers.isNotEmpty()) {
+                            playerList.clear()
+                            for (player in game!!.inGameUsers) {
+                                playerList.add(player)
+                            }
+                            adapter.notifyDataSetChanged()
+                        }
+                    }
+                    response.code() == 401 -> {
+                        Toast.makeText(this@GameActivity, "Login Expired.", Toast.LENGTH_SHORT)
+                            .show()
+                        ApiClient.resetToken()
+                        val intent = Intent(this@GameActivity, LoginActivity::class.java)
+                        startActivity(intent)
+                    }
+                    response.code() / 100 == 5 -> {
+                        Toast.makeText(this@GameActivity, "Server Error", Toast.LENGTH_SHORT).show()
                     }
                 }
             }

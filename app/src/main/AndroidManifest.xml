@@ -33,7 +33,7 @@
         <activity android:name=".activites.GameActivity" />
         <activity android:name=".activites.LoadGameActivity" />
         <activity android:name=".activites.JoinGameActivity" />
-        <activity android:name=".activites.LoadedGameActivity" />
+        <activity android:name=".activites.ProfileActivity" />
         <activity android:name=".activites.LoginActivity" />
     </application>
 

@@ -15,12 +15,16 @@ object ApiClient {
     var token: String = ""
 
     fun saveToken(token: String) {
-        ApiClient.token = token
+        this.token = token
+    }
+
+    fun resetToken() {
+        token = ""
     }
 
     var okHttpClient = UnsafeOkHttpClient.unsafeOkHttpClient
 
-    const val SITE_URL = "https://a23c157d.ngrok.io/"
+    const val SITE_URL = "https://a62342f3.ngrok.io/"
     private const val BASE_URL = "${SITE_URL}api/"
     val getClient: ApiInterface
         get() {

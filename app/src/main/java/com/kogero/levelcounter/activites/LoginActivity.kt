@@ -8,8 +8,6 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.kogero.levelcounter.R
-import com.kogero.levelcounter.activites.MainMenuActivity
-import com.kogero.levelcounter.activites.SignUpActivity
 import com.kogero.levelcounter.api.ApiClient
 import com.kogero.levelcounter.helpers.AppUser
 import com.kogero.levelcounter.helpers.JWTUtils
@@ -18,7 +16,6 @@ import com.kogero.levelcounter.models.responses.LoginResponse
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-
 
 
 class LoginActivity : AppCompatActivity() {
@@ -32,6 +29,10 @@ class LoginActivity : AppCompatActivity() {
     private var UnameValue: String? = null
     private val DEFAULT_PASSWORD = ""
     private var PasswordValue: String? = null
+    private val PREF_TOKEN: String = "token"
+    private var defaultTokenValue: String = ""
+    private val PREF_USER_ID: String = "userId"
+    private var defaultUserId: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,6 +51,12 @@ class LoginActivity : AppCompatActivity() {
             val intent = Intent(this, SignUpActivity::class.java)
             startActivity(intent)
         }
+
+        loadTokenAndUserId()
+        if (ApiClient.token.isNotEmpty() && AppUser.id.isNotEmpty()) {
+            val intent = Intent(this, MainMenuActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     public override fun onPause() {
@@ -63,6 +70,16 @@ class LoginActivity : AppCompatActivity() {
         loadPreferences()
     }
 
+    private fun saveUserId(userId: String) {
+        val settings = getSharedPreferences(
+            PREF_NAME,
+            Context.MODE_PRIVATE
+        )
+        val editor = settings.edit()
+        editor.putString(PREF_USER_ID, appUser.id)
+        editor.apply()
+    }
+
     private fun savePreferences() {
         val settings = getSharedPreferences(
             PREF_NAME,
@@ -70,12 +87,23 @@ class LoginActivity : AppCompatActivity() {
         )
         val editor = settings.edit()
 
-        // Edit and commit
         UnameValue = findViewById<EditText>(R.id.editTextUserName).text.toString()
         PasswordValue = findViewById<EditText>(R.id.editTextPassword).text.toString()
         editor.putString(PREF_UNAME, UnameValue)
         editor.putString(PREF_PASSWORD, PasswordValue)
+        editor.putString(PREF_TOKEN, ApiClient.token)
         editor.apply()
+    }
+
+    private fun loadTokenAndUserId() {
+        val settings = getSharedPreferences(
+            PREF_NAME,
+            Context.MODE_PRIVATE
+        )
+        val savedToken = settings.getString(PREF_TOKEN, defaultTokenValue)
+        ApiClient.token = savedToken!!
+        val savedUserId = settings.getString(PREF_USER_ID, defaultUserId)
+        AppUser.id = savedUserId!!
     }
 
     private fun loadPreferences() {
@@ -112,15 +140,21 @@ class LoginActivity : AppCompatActivity() {
                         token = response.body()!!.token
                         ApiClient.saveToken(token)
                         appUser.id = JWTUtils().decode(token).toString()
+                        saveUserId(appUser.id)
                         savePreferences()
                         val intent = Intent(context, MainMenuActivity::class.java)
                         startActivity(intent)
                     }
                     response.code() == 400 -> {
-                        Toast.makeText(context, "Invalid Login Attempt:\nWrong username or password", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            "Invalid Login Attempt:\nWrong username or password",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                     response.code() == 401 -> {
                         Toast.makeText(context, "Login Expired.", Toast.LENGTH_SHORT).show()
+                        ApiClient.resetToken()
                         val intent = Intent(context, LoginActivity::class.java)
                         startActivity(intent)
                     }

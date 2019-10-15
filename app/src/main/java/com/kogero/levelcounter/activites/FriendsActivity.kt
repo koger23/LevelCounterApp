@@ -146,6 +146,7 @@ class FriendsActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                     }
                 } else if (response.code() == 401) {
                     Toast.makeText(context, "Login expired.", Toast.LENGTH_SHORT).show()
+                    ApiClient.resetToken()
                     val intent = Intent(context, MainActivity::class.java)
                     startActivity(intent)
                 }

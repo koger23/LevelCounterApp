@@ -7,8 +7,10 @@ import com.kogero.levelcounter.models.UserListViewModel
 import com.kogero.levelcounter.models.requests.InGameUserCreationRequest
 import com.kogero.levelcounter.models.requests.LoginRequest
 import com.kogero.levelcounter.models.requests.SignUpRequest
+import com.kogero.levelcounter.models.requests.UserEditRequest
 import com.kogero.levelcounter.models.responses.LoginResponse
 import com.kogero.levelcounter.models.responses.SignUpResponse
+import com.kogero.levelcounter.models.responses.UserResponse
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.http.*
@@ -88,4 +90,10 @@ interface ApiInterface {
 
     @GET("game/joinGame")
     fun joinGame(@Query("gameId") gameId: Int): Call<Game>
+
+    @GET("user/userdata")
+    fun getUserData(): Call<UserResponse>
+
+    @PUT("user/update")
+    fun updateUserData(@Body userEditRequest: UserEditRequest): Call<ResponseBody>
 }

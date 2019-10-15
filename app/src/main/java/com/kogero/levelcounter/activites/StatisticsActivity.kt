@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.kogero.levelcounter.api.ApiClient
 import com.kogero.levelcounter.R
+import com.kogero.levelcounter.helpers.TimeConverter
 import com.kogero.levelcounter.models.Statistics
 import retrofit2.Call
 import retrofit2.Callback
@@ -37,7 +38,7 @@ class StatisticsActivity : AppCompatActivity() {
         tvWins.text = statistics.wins.toString()
 
         val tvTimePlayed = findViewById<TextView>(R.id.tvTimePlayed)
-        tvTimePlayed.text = statistics.playTime.toString()
+        tvTimePlayed.text = TimeConverter.convertTimeFromLong(statistics.playTime.toLong())
 
         val relationshipId = intent.extras.getInt("RELATIONSHIPID")
         val isFriend = intent.extras.getBoolean("ISFRIEND")

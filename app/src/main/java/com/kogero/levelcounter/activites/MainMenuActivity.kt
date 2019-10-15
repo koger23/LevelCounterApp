@@ -34,6 +34,9 @@ class MainMenuActivity : AppCompatActivity() {
             startActivity(intent)}
 
         val btnProfile = findViewById<Button>(R.id.btnProfile)
+        btnProfile.setOnClickListener {
+            val intent = Intent(this, ProfileActivity::class.java)
+            startActivity(intent)}
 
         val btnFriends = findViewById<Button>(R.id.btnFriends)
         btnFriends.setOnClickListener {

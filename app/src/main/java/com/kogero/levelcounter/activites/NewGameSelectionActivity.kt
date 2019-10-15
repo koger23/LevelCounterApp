@@ -180,6 +180,7 @@ class NewGameSelectionActivity : AppCompatActivity() {
                 } else if (response.code() == 401) {
                     Toast.makeText(this@NewGameSelectionActivity, "Login expired.", Toast.LENGTH_SHORT)
                         .show()
+                    ApiClient.resetToken()
                     val intent = Intent(this@NewGameSelectionActivity, LoginActivity::class.java)
                     startActivity(intent)
                 } else {

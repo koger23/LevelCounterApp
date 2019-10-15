@@ -7,10 +7,10 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.kogero.levelcounter.api.ApiClient
 import com.kogero.levelcounter.R
-import com.kogero.levelcounter.listeners.RecyclerViewTouchListener
 import com.kogero.levelcounter.adapters.LoadGameAdapter
+import com.kogero.levelcounter.api.ApiClient
+import com.kogero.levelcounter.listeners.RecyclerViewTouchListener
 import com.kogero.levelcounter.models.Game
 import com.kogero.levelcounter.models.RecyclerViewClickListener
 import retrofit2.Call
@@ -55,18 +55,28 @@ class LoadGameActivity : AppCompatActivity() {
                 call: Call<List<Game>>,
                 response: Response<List<Game>>
             ) {
-                Toast.makeText(
-                    this@LoadGameActivity,
-                    "Code: ${response.code()}",
-                    Toast.LENGTH_SHORT
-                ).show()
-                val games = response.body()
-                if (games!!.isNotEmpty()) {
-                    gameList.clear()
-                    for (player in games) {
-                        gameList.add(player)
+                when {
+                    response.code() == 200 -> {
+                        val games = response.body()
+                        if (games!!.isNotEmpty()) {
+                            gameList.clear()
+                            for (player in games) {
+                                gameList.add(player)
+                            }
+                            adapter.notifyDataSetChanged()
+                        }
                     }
-                    adapter.notifyDataSetChanged()
+                    response.code() == 401 -> {
+                        Toast.makeText(this@LoadGameActivity, "Login Expired.", Toast.LENGTH_SHORT)
+                            .show()
+                        ApiClient.resetToken()
+                        val intent = Intent(this@LoadGameActivity, LoginActivity::class.java)
+                        startActivity(intent)
+                    }
+                    response.code() / 100 == 5 -> {
+                        Toast.makeText(this@LoadGameActivity, "Server Error", Toast.LENGTH_SHORT)
+                            .show()
+                    }
                 }
             }
 

@@ -82,14 +82,21 @@ class PendingRequestActivity : AppCompatActivity(), AdapterView.OnItemClickListe
                 )
                     .show()
 
-                if (response.code() == 200) {
-                    userList.remove(userList[position])
-                    adapter.notifyItemRemoved(position)
+                when {
+                    response.code() == 200 -> {
+                        userList.remove(userList[position])
+                        adapter.notifyItemRemoved(position)
 
-                } else if (response.code() == 401) {
-                    Toast.makeText(context, "Login expired.", Toast.LENGTH_SHORT).show()
-                    val intent = Intent(context, LoginActivity::class.java)
-                    startActivity(intent)
+                    }
+                    response.code() == 401 -> {
+                        Toast.makeText(context, "Login expired.", Toast.LENGTH_SHORT).show()
+                        ApiClient.resetToken()
+                        val intent = Intent(context, LoginActivity::class.java)
+                        startActivity(intent)
+                    }
+                    response.code() / 100 == 5 -> {
+                        Toast.makeText(context, "Server Error", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
 
