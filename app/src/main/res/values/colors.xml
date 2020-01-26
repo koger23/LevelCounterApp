@@ -3,4 +3,9 @@
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
+    <color name="munchkinYellow">#fad7a0</color>
+    <color name="munchkinBrown">#3E2723</color>
+    <color name="munchkinLightBrown">#613D36</color>
+    <color name="munchkinButtonPressedLightBrown">#835249</color>
+    <color name="white">#FFFFFF</color>
 </resources>
