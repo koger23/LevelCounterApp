@@ -3,7 +3,7 @@ package com.kogero.levelcounter
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.kogero.levelcounter.activites.LoginActivity
+import com.kogero.levelcounter.activities.LoginActivity
 
 
 class MainActivity : AppCompatActivity() {

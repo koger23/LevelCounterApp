@@ -3,6 +3,7 @@ package com.kogero.levelcounter.activities
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
@@ -25,6 +26,7 @@ import com.kogero.levelcounter.models.InGameUser
 import com.kogero.levelcounter.models.RecyclerViewClickListener
 import com.microsoft.signalr.HubConnection
 import com.microsoft.signalr.HubConnectionBuilder
+import com.microsoft.signalr.HubConnectionState
 import kotlinx.android.synthetic.main.activity_game.*
 import okhttp3.ResponseBody
 import retrofit2.Call
@@ -41,32 +43,22 @@ class GameActivity : AppCompatActivity() {
     private var isFirstStart = true
     private var addedToGroup = false
     private var gameId: Int = 0
+    private var isTimersInitialized = false
     var gameIsRunning = true
 
     var game: Game? = null
     var joinGame = 0
+    var playerCountDownTimers: HashMap<String, CountDownTimer> = HashMap()
     var playerList: ArrayList<InGameUser> = ArrayList()
     val adapter = GameAdapter(this, playerList)
     private val gson = Gson()
     private lateinit var hubConnection: HubConnection
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game)
 
-        hubConnection = HubConnectionBuilder.create("${ApiClient.SITE_URL}game").build()
-        hubConnection.on("Send", {}, String::class.java)
-        hubConnection.on("broadcastMessage", { message ->
-            val gameFromMsg = gson.fromJson(message, Game::class.java)
-            this@GameActivity.runOnUiThread {
-                if (gameFromMsg.senderId != AppUser.id) {
-                    updateGame(gameFromMsg)
-                }
-            }
-        }, String::class.java)
-
-        val connection = HubConnectionTask().execute(hubConnection)
+        initHubConnection()
 
         gameId = intent.getIntExtra("GAMEID", 1)
         joinGame = intent.getIntExtra("JOIN", 0)
@@ -109,11 +101,6 @@ class GameActivity : AppCompatActivity() {
                 })
         )
 
-        if (isFirstStart) {
-            startClock()
-            isFirstStart = false
-        }
-
         val btnBonusPlus = findViewById<ImageButton>(R.id.btnBonusPlus)
         btnBonusPlus.setOnClickListener {
             increaseBonus(playerList[adapter.selectedPosition])
@@ -129,6 +116,99 @@ class GameActivity : AppCompatActivity() {
         val btnLevelMinus = findViewById<ImageButton>(R.id.btnLevelMin)
         btnLevelMinus.setOnClickListener {
             decreaseLevel(playerList[adapter.selectedPosition])
+        }
+
+        if (isFirstStart) {
+            startClock()
+            heartBeat()
+            isFirstStart = false
+        }
+    }
+
+    private fun initHubConnection() {
+        hubConnection = HubConnectionBuilder.create("${ApiClient.SITE_URL}game").build()
+        hubConnection.on("Send", {}, String::class.java)
+        hubConnection.on("broadcastMessage", { message ->
+            val gameFromMsg = gson.fromJson(message, Game::class.java)
+            this@GameActivity.runOnUiThread {
+                if (gameFromMsg.senderId != AppUser.id) {
+                    updateGame(gameFromMsg)
+                }
+            }
+        }, String::class.java)
+        hubConnection.on("HeartBeat", {}, String::class.java)
+        hubConnection.on("isOnline", { message ->
+            val userIdFromMessage = gson.fromJson(message, String::class.java)
+            this@GameActivity.runOnUiThread {
+                for (i in playerList.indices) {
+                    if (playerList[i].UserId == userIdFromMessage) {
+                        playerList[i].IsOnline = true
+                        adapter.notifyDataSetChanged()
+                        if (game != null && playerCountDownTimers.isNotEmpty()) {
+                            playerCountDownTimers[userIdFromMessage]!!.cancel()
+                            playerCountDownTimers[userIdFromMessage]!!.start()
+                        }
+                    }
+                }
+            }
+        }, String::class.java)
+
+        HubConnectionTask().execute(hubConnection)
+    }
+
+    private fun initCountDownTimers(playerList: List<InGameUser>) {
+        if (joinGame == 0 && !isTimersInitialized) {
+            for (player in playerList) {
+                val counter = object : CountDownTimer(5000, 1000) {
+                    override fun onTick(millisUntilFinished: Long) {
+                        println(">>> Tik-tok: " + player.UserName + " " + millisUntilFinished + " ms")
+                    }
+
+                    override fun onFinish() {
+                        println(">>> Tik-tok: " + player.UserName + " OFFLINE")
+
+                        setPlayerOffline(player.UserId)
+                        sendGameStateWithSignalR()
+                        adapter.notifyDataSetChanged()
+                    }
+                }
+                playerCountDownTimers[player.UserId] = counter
+                counter.start()
+            }
+        }
+    }
+
+    private fun setPlayerOffline(userId: String) {
+        for (player in game!!.inGameUsers) {
+            if (player.UserId == userId) {
+                player.IsOnline = false
+                break
+            }
+        }
+    }
+
+    private fun heartBeat() {
+        val heartBeatThread = object : Thread() {
+
+            override fun run() {
+                try {
+                    while (gameIsRunning) {
+                        sleep(1000)
+                        runOnUiThread {
+                            if (hubConnection.connectionState == HubConnectionState.CONNECTED) {
+                                hubConnection.send("HeartBeat", gameId, AppUser.id)
+                                adapter.notifyDataSetChanged()
+                            }
+                        }
+                    }
+                } catch (e: InterruptedException) {
+                    println(e.stackTrace)
+                }
+            }
+        }
+        heartBeatThread.start()
+        if (!gameIsRunning) {
+            heartBeatThread.interrupt()
         }
     }
 
@@ -258,6 +338,13 @@ class GameActivity : AppCompatActivity() {
                                 playerList.add(player)
                             }
                             adapter.notifyDataSetChanged()
+                            initCountDownTimers(playerList)
+                            while (hubConnection.connectionState != HubConnectionState.CONNECTED) {
+                                if (hubConnection.connectionState == HubConnectionState.CONNECTED) {
+                                    sendGameStateWithSignalR()
+                                    break
+                                }
+                            }
                         }
                     }
                     response.code() == 401 -> {
@@ -304,6 +391,9 @@ class GameActivity : AppCompatActivity() {
             .setTitle("Quit")
             .setMessage("Are you sure to quit?")
             .setNeutralButton("Yes") { _, _ ->
+                gameIsRunning = false
+                sendGameStateWithSignalR()
+                hubConnection.stop()
                 startActivity(i)
                 finish()
             }
@@ -425,6 +515,7 @@ class GameActivity : AppCompatActivity() {
             override fun run() {
                 try {
                     while (gameIsRunning) {
+
                         sleep(1000)
                         runOnUiThread {
                             totalSecs =

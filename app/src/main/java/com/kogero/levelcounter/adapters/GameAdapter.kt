@@ -46,6 +46,11 @@ class GameAdapter(
             holder.tvGender.setTextColor(Color.WHITE)
         }
         holder.tvPlayerName.text = userList[position].UserName
+        if (userList[position].IsOnline) {
+            holder.tvPlayerStatusIndicator.visibility = View.VISIBLE
+        } else {
+            holder.tvPlayerStatusIndicator.visibility = View.INVISIBLE
+        }
         holder.tvLevelValue.text = userList[position].Level.toString()
         holder.tvBonusValue.text = userList[position].Bonus.toString()
         holder.tvStrengthValue.text = (userList[position].Bonus + userList[position].Level).toString()
@@ -59,7 +64,6 @@ class GameAdapter(
             selectedPosition = position
             notifyDataSetChanged()
         })
-
     }
 
 
@@ -75,6 +79,7 @@ class GameAdapter(
 
         val layoutPlayer: ConstraintLayout = view.player_item_layout
         val tvPlayerName: TextView = view.tvPlayerName
+        val tvPlayerStatusIndicator: TextView = view.tvPlayerStatusIndicator
         val tvLevel: TextView = view.tvLevel
         val tvLevelValue: TextView = view.tvLevelValue
         val tvBonus: TextView = view.tvBonus

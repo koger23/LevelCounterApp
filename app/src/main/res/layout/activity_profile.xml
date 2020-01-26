@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="@color/munchkinYellow"
     android:orientation="vertical"
-    tools:context=".activites.ProfileActivity">
+    tools:context="activities.ProfileActivity">
 
 
     <ImageView

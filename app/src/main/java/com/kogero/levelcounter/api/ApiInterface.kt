@@ -4,10 +4,7 @@ import com.kogero.levelcounter.models.Game
 import com.kogero.levelcounter.models.InGameUser
 import com.kogero.levelcounter.models.Statistics
 import com.kogero.levelcounter.models.UserListViewModel
-import com.kogero.levelcounter.models.requests.InGameUserCreationRequest
-import com.kogero.levelcounter.models.requests.LoginRequest
-import com.kogero.levelcounter.models.requests.SignUpRequest
-import com.kogero.levelcounter.models.requests.UserEditRequest
+import com.kogero.levelcounter.models.requests.*
 import com.kogero.levelcounter.models.responses.LoginResponse
 import com.kogero.levelcounter.models.responses.SignUpResponse
 import com.kogero.levelcounter.models.responses.UserResponse
@@ -96,4 +93,7 @@ interface ApiInterface {
 
     @PUT("user/update")
     fun updateUserData(@Body userEditRequest: UserEditRequest): Call<ResponseBody>
+
+    @PUT("user/password/change")
+    fun changePassword(@Body passwordChangeRequest: PasswordChangeRequest): Call<ResponseBody>
 }

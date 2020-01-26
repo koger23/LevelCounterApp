@@ -17,5 +17,7 @@ data class InGameUser (
     @SerializedName("gameId")
     val GameId: Int,
     @SerializedName("gender")
-    var Gender: Gender = com.kogero.levelcounter.models.Gender.MALE
+    var Gender: Gender = com.kogero.levelcounter.models.Gender.MALE,
+    @SerializedName("isOnline")
+    var IsOnline: Boolean = false
 ) : Serializable
