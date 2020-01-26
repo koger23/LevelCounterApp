@@ -84,8 +84,8 @@ class NewGameSelectionActivity : AppCompatActivity() {
                 val game: Game? = response.body()
                 if (response.code() == 200) {
                     if (game != null) {
-                        Toast.makeText(this@NewGameSelectionActivity, "Time:" + game.dateTime, Toast.LENGTH_LONG)
-                            .show()
+//                        Toast.makeText(this@NewGameSelectionActivity, "Time:" + game.dateTime, Toast.LENGTH_LONG)
+//                            .show()
                         addInGameUsers(game.id)
                     } else {
                         Toast.makeText(this@NewGameSelectionActivity, "Game with not exists" + response.code(), Toast.LENGTH_LONG)

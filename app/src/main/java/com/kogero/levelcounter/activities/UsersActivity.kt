@@ -94,12 +94,6 @@ open class UsersActivity : AppCompatActivity(), AdapterView.OnItemClickListener 
                 call: Call<Statistics>,
                 response: Response<Statistics>
             ) {
-                Toast.makeText(
-                    context,
-                    "Code: " + response.code(),
-                    Toast.LENGTH_SHORT
-                )
-                    .show()
                 val statistics: Statistics? = response.body()
                 if (response.code() == 200) {
                     if (statistics != null) {

@@ -75,13 +75,6 @@ class PendingRequestActivity : AppCompatActivity(), AdapterView.OnItemClickListe
                 call: Call<ResponseBody>,
                 response: Response<ResponseBody>
             ) {
-                Toast.makeText(
-                    context,
-                    "Code: " + response.code(),
-                    Toast.LENGTH_SHORT
-                )
-                    .show()
-
                 when {
                     response.code() == 200 -> {
                         userList.remove(userList[position])
@@ -123,13 +116,6 @@ class PendingRequestActivity : AppCompatActivity(), AdapterView.OnItemClickListe
                 call: Call<ResponseBody>,
                 response: Response<ResponseBody>
             ) {
-                Toast.makeText(
-                    context,
-                    "Code: " + response.code(),
-                    Toast.LENGTH_SHORT
-                )
-                    .show()
-
                 if (response.code() == 200) {
                     userList.remove(userList[position])
                     adapter.notifyItemRemoved(position)

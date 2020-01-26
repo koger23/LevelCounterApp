@@ -87,8 +87,6 @@ class FriendsActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                 call: Call<List<UserListViewModel>>,
                 response: Response<List<UserListViewModel>>
             ) {
-                Toast.makeText(this@FriendsActivity, "Code: " + response.code(), Toast.LENGTH_SHORT)
-                    .show()
                 val userData: List<UserListViewModel>? = response.body()
                 if (response.code() == 200) {
                     if (userData != null) {
@@ -127,12 +125,6 @@ class FriendsActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                 call: Call<List<UserListViewModel>>,
                 response: Response<List<UserListViewModel>>
             ) {
-                Toast.makeText(
-                    context,
-                    "Code: " + response.code(),
-                    Toast.LENGTH_SHORT
-                )
-                    .show()
                 val pendingRequests: List<UserListViewModel>? = response.body()
                 if (response.code() == 200) {
                     if (pendingRequests != null && pendingRequests.isNotEmpty()) {
@@ -174,12 +166,6 @@ class FriendsActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                 call: Call<Statistics>,
                 response: Response<Statistics>
             ) {
-                Toast.makeText(
-                    context,
-                    "Code: " + response.code(),
-                    Toast.LENGTH_SHORT
-                )
-                    .show()
                 val statistics: Statistics? = response.body()
                 if (response.code() == 200) {
                     if (statistics != null) {

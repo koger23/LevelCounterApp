@@ -96,11 +96,6 @@ class JoinGameActivity : AppCompatActivity() {
                 call: Call<List<Game>>,
                 response: Response<List<Game>>
             ) {
-                Toast.makeText(
-                    this@JoinGameActivity,
-                    "Code: ${response.code()}",
-                    Toast.LENGTH_SHORT
-                ).show()
                 val games = response.body()
                 if (games!!.isNotEmpty()) {
                     gameList.clear()
