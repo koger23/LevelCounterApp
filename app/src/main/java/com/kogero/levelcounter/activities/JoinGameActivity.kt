@@ -97,7 +97,7 @@ class JoinGameActivity : AppCompatActivity() {
                 response: Response<List<Game>>
             ) {
                 val games = response.body()
-                if (games!!.isNotEmpty()) {
+                if (!games.isNullOrEmpty()) {
                     gameList.clear()
                     for (player in games) {
                         gameList.add(player)
