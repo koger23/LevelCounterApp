@@ -1,6 +1,7 @@
 package com.kogero.levelcounter.activities
 
 import android.content.Context
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.widget.ImageView
 import android.widget.TextView
@@ -21,6 +22,7 @@ class StatisticsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.actitvity_playerstat)
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_NOSENSOR
 
         val userName = intent.extras.getString("USERNAME")
         val tvUserName = findViewById<TextView>(R.id.tvUserName)

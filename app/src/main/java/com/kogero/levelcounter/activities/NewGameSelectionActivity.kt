@@ -1,9 +1,11 @@
 package com.kogero.levelcounter.activities
 
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
+import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -26,6 +28,7 @@ class NewGameSelectionActivity : AppCompatActivity() {
 
     private var viewModels = ArrayList<UserSelectionModel>()
     private val friendList: ArrayList<UserListViewModel> = ArrayList()
+    private var ngrockUrl = ""
     var adapter = NewGameSelectionAdapter(this, viewModels)
     var progressBar: ProgressBar? = null
 
@@ -43,6 +46,7 @@ class NewGameSelectionActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.acitvity_userselection)
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_NOSENSOR
 
         val recyclerView = findViewById<RecyclerView>(R.id.rv_selectfriends)
         recyclerView.layoutManager = LinearLayoutManager(this@NewGameSelectionActivity)
@@ -119,8 +123,11 @@ class NewGameSelectionActivity : AppCompatActivity() {
                 if (response.code() == 200) {
                     if (game != null) {
                         val intent = Intent(this@NewGameSelectionActivity, GameActivity::class.java)
+                        ngrockUrl = findViewById<EditText>(R.id.editTextLink).text.toString()
+                        println("----> OnLoad: $ngrockUrl")
                         intent.putExtra("GAMEID", game.id)
                         intent.putExtra("JOIN", 0)
+                        intent.putExtra("NGROCK", ngrockUrl)
                         progressBar!!.visibility = View.INVISIBLE
                         startActivity(intent)
                     } else {

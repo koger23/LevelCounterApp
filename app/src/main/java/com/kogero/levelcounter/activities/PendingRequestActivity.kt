@@ -2,6 +2,7 @@ package com.kogero.levelcounter.activities
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
@@ -33,6 +34,7 @@ class PendingRequestActivity : AppCompatActivity(), AdapterView.OnItemClickListe
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pending_requests)
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_NOSENSOR
 
         val recyclerView = findViewById<RecyclerView>(R.id.rv_user_list)
         recyclerView.layoutManager = LinearLayoutManager(this)

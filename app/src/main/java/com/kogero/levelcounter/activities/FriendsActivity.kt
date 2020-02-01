@@ -2,6 +2,7 @@ package com.kogero.levelcounter.activities
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
@@ -49,6 +50,7 @@ class FriendsActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_friends)
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_NOSENSOR
 
         val btnSearch = findViewById<ImageButton>(R.id.btnSearch)
         btnSearch.setOnClickListener {

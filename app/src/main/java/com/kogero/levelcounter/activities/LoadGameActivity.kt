@@ -1,8 +1,10 @@
 package com.kogero.levelcounter.activities
 
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.View
+import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,10 +22,12 @@ import retrofit2.Response
 class LoadGameActivity : AppCompatActivity() {
     var gameList: ArrayList<Game> = ArrayList()
     val adapter = LoadGameAdapter(this, gameList)
+    private var ngrockUrl = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_loadgame)
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_NOSENSOR
 
         val recyclerView = findViewById<RecyclerView>(R.id.rv_load_game_list)
         recyclerView.layoutManager = LinearLayoutManager(this@LoadGameActivity)
@@ -37,7 +41,9 @@ class LoadGameActivity : AppCompatActivity() {
                         val selectedGame = gameList[position]
                         val gameId = selectedGame.id
                         val intent = Intent(this@LoadGameActivity, GameActivity::class.java)
+                        ngrockUrl = findViewById<EditText>(R.id.editTextLink).text.toString()
                         intent.putExtra("GAMEID", gameId)
+                        intent.putExtra("NGROCK", ngrockUrl)
                         startActivity(intent)
                     }
 

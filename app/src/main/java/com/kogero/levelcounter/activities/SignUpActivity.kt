@@ -1,5 +1,6 @@
 package com.kogero.levelcounter.activities
 
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -22,6 +23,7 @@ class SignUpActivity : AppCompatActivity() {
         window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
         actionBar?.hide()
         setContentView(R.layout.activity_signup)
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_NOSENSOR
 
         val btnSignUp = findViewById<Button>(R.id.buttonSignUp)
         btnSignUp.setOnClickListener {

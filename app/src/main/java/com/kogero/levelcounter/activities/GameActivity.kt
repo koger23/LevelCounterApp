@@ -2,6 +2,7 @@ package com.kogero.levelcounter.activities
 
 import android.app.AlertDialog
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.view.View
@@ -17,6 +18,7 @@ import com.kogero.levelcounter.R
 import com.kogero.levelcounter.adapters.GameAdapter
 import com.kogero.levelcounter.api.ApiClient
 import com.kogero.levelcounter.helpers.AppUser
+import com.kogero.levelcounter.helpers.HttpsTrustManager
 import com.kogero.levelcounter.helpers.TimeConverter
 import com.kogero.levelcounter.hub.HubConnectionTask
 import com.kogero.levelcounter.listeners.RecyclerViewTouchListener
@@ -57,11 +59,15 @@ class GameActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game)
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_NOSENSOR
 
-        initHubConnection()
+        HttpsTrustManager.allowAllSSL()
 
         gameId = intent.getIntExtra("GAMEID", 1)
         joinGame = intent.getIntExtra("JOIN", 0)
+        var ngrok = "http://" + intent.getStringExtra("NGROCK") + ".ngrok.io/game"
+        println("---> Ingame: $ngrok")
+        initHubConnection(ngrok)
 
         getGame(gameId)
 
@@ -125,8 +131,11 @@ class GameActivity : AppCompatActivity() {
         }
     }
 
-    private fun initHubConnection() {
-        hubConnection = HubConnectionBuilder.create("${ApiClient.SITE_URL}game").build()
+    private fun initHubConnection(ngrok_url: String) {
+//        hubConnection = HubConnectionBuilder.create("${ApiClient.SITE_URL}game").build()
+        hubConnection = HubConnectionBuilder.create(ngrok_url).build()
+//        hubConnection = HubConnectionBuilder.create("http://bd47aae2.ngrok.io/game").build()
+//        hubConnection = HubConnectionBuilder.create("http://kogero.com/game").build()
         hubConnection.on("Send", {}, String::class.java)
         hubConnection.on("broadcastMessage", { message ->
             val gameFromMsg = gson.fromJson(message, Game::class.java)

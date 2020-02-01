@@ -24,7 +24,7 @@ object ApiClient {
 
     var okHttpClient = UnsafeOkHttpClient.unsafeOkHttpClient
 
-    const val SITE_URL = "https://koger23.myftp.org/"
+    const val SITE_URL = "https://kogero.com/"
     private const val BASE_URL = "${SITE_URL}api/"
     val getClient: ApiInterface
         get() {
