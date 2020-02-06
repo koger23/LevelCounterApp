@@ -51,6 +51,7 @@ class GameActivity : AppCompatActivity() {
     private var isTimersInitialized = false
     private var isTimeSynced = false
     var gameIsRunning = true
+    private lateinit var playerJoined: Array<String>
 
     var game: Game? = null
     var joinGame = 0
@@ -71,7 +72,7 @@ class GameActivity : AppCompatActivity() {
         joinGame = intent.getIntExtra("JOIN", 0)
         var ngrok = "https://" + intent.getStringExtra("NGROCK") + ".ngrok.io/game"
         initHubConnection(ngrok)
-
+        addGameToSignalRGroup()
         getGame(gameId)
 
         val tvRound = findViewById<TextView>(R.id.tvRound)
@@ -147,6 +148,15 @@ class GameActivity : AppCompatActivity() {
 
     private fun initHubConnection(ngrok_url: String) {
         hubConnection = HubConnectionBuilder.create(ngrok_url).build()
+
+        hubConnection.on("playerJoined", { message ->
+            val playerFromMsg = gson.fromJson(message, InGameUser::class.java)
+            this@GameActivity.runOnUiThread {
+                if (game!!.hostingUserId == AppUser.id) {
+                    sendGameStateWithSignalR()
+                }
+            }
+        }, String::class.java)
         hubConnection.on("time", { message ->
             val timeFromMsg = gson.fromJson(message, SyncedTime::class.java)
             this@GameActivity.runOnUiThread {
@@ -192,7 +202,6 @@ class GameActivity : AppCompatActivity() {
                 }
             }
         }, String::class.java)
-        hubConnection.on("HeartBeat", {}, String::class.java)
         hubConnection.on("isOnline", { message ->
             val userIdFromMessage = gson.fromJson(message, String::class.java)
             this@GameActivity.runOnUiThread {
@@ -302,7 +311,7 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun addGameToSignalRGroup() {
-        if (!addedToGroup) {
+        if (!addedToGroup || hubConnection.connectionState != HubConnectionState.CONNECTED) {
             try {
                 hubConnection.send("AddToGroup", gameId, AppUser.id)
                 addedToGroup = false
@@ -472,14 +481,14 @@ class GameActivity : AppCompatActivity() {
                             }
                             adapter.notifyDataSetChanged()
                             initCountDownTimers(playerList)
-                            while (hubConnection.connectionState != HubConnectionState.CONNECTED) {
-                                if (hubConnection.connectionState == HubConnectionState.CONNECTED) {
-                                    if (game!!.hostingUserId == AppUser.id) {
-                                        sendGameStateWithSignalR()
-                                    }
-                                    break
-                                }
-                            }
+//                            while (hubConnection.connectionState != HubConnectionState.CONNECTED) {
+//                                if (hubConnection.connectionState == HubConnectionState.CONNECTED) {
+//                                    if (game!!.hostingUserId == AppUser.id) {
+//                                        sendGameStateWithSignalR()
+//                                    }
+//                                    break
+//                                }
+//                            }
                         }
                     }
                     response.code() == 401 -> {
@@ -668,6 +677,9 @@ class GameActivity : AppCompatActivity() {
                             clock.text = time
                             if (game != null && AppUser.id == game!!.hostingUserId) {
                                 sendTimeWithSignalR(totalSecs)
+                            }
+                            if (joinGame == 1) {
+                                addGameToSignalRGroup()
                             }
                         }
                     }
