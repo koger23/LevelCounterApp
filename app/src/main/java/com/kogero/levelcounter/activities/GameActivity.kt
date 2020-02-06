@@ -79,12 +79,16 @@ class GameActivity : AppCompatActivity() {
         btnNextRound.setOnClickListener {
             round++
             tvRound.text = "Round $round"
-            sendGameStateWithSignalR()
+//            sendGameStateWithSignalR()
+            sendRoundsWithSignalR(round)
         }
         btnNextRound.setOnLongClickListener {
-            round--
-            tvRound.text = "Round $round"
-            sendGameStateWithSignalR()
+            if (round > 1) {
+                round--
+                tvRound.text = "Round $round"
+//            sendGameStateWithSignalR()
+                sendRoundsWithSignalR(round)
+            }
             return@setOnLongClickListener true
         }
 
@@ -141,6 +145,15 @@ class GameActivity : AppCompatActivity() {
 
     private fun initHubConnection(ngrok_url: String) {
         hubConnection = HubConnectionBuilder.create(ngrok_url).build()
+        hubConnection.on("round", { message ->
+            val roundFromMsg = gson.fromJson(message, Int::class.java)
+            this@GameActivity.runOnUiThread {
+                if (game!!.hostingUserId != AppUser.id) {
+                    round = roundFromMsg
+                    tvRound.text = "Round $round"
+                }
+            }
+        }, String::class.java)
         hubConnection.on("user", { message ->
             val userFromMsg = gson.fromJson(message, SyncedUser::class.java)
             this@GameActivity.runOnUiThread {
@@ -288,6 +301,24 @@ class GameActivity : AppCompatActivity() {
                 )
                     .show()
             }
+        }
+    }
+
+    private fun sendRoundsWithSignalR(round: Int) {
+        addGameToSignalRGroup()
+        try {
+            try {
+                hubConnection.send("SyncRound", gameId, round)
+            } catch (e: RuntimeException) {
+                Toast.makeText(
+                    this@GameActivity,
+                    "Socket connection is not active.",
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
