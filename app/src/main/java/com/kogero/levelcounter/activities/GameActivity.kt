@@ -10,6 +10,7 @@ import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -26,6 +27,7 @@ import com.kogero.levelcounter.models.Game
 import com.kogero.levelcounter.models.Gender
 import com.kogero.levelcounter.models.InGameUser
 import com.kogero.levelcounter.models.RecyclerViewClickListener
+import com.kogero.levelcounter.models.responses.SyncedUser
 import com.microsoft.signalr.HubConnection
 import com.microsoft.signalr.HubConnectionBuilder
 import com.microsoft.signalr.HubConnectionState
@@ -79,7 +81,7 @@ class GameActivity : AppCompatActivity() {
             tvRound.text = "Round $round"
             sendGameStateWithSignalR()
         }
-        btnNextRound.setOnLongClickListener{
+        btnNextRound.setOnLongClickListener {
             round--
             tvRound.text = "Round $round"
             sendGameStateWithSignalR()
@@ -140,16 +142,18 @@ class GameActivity : AppCompatActivity() {
     private fun initHubConnection(ngrok_url: String) {
         hubConnection = HubConnectionBuilder.create(ngrok_url).build()
         hubConnection.on("user", { message ->
-            val userFromMsg = gson.fromJson(message, InGameUser::class.java)
+            val userFromMsg = gson.fromJson(message, SyncedUser::class.java)
             this@GameActivity.runOnUiThread {
-                for (player in game!!.inGameUsers) {
-                    if (player.UserId == userFromMsg.UserId) {
-                        player.Bonus = userFromMsg.Bonus
-                        player.Gender = userFromMsg.Gender
-                        player.Level = userFromMsg.Level
-                        player.IsOnline = userFromMsg.IsOnline
-                        adapter.notifyDataSetChanged()
-                        break
+                if (userFromMsg.senderId != AppUser.id) {
+                    for (player in game!!.inGameUsers) {
+                        if (player.UserId == userFromMsg.UserId) {
+                            player.Bonus = userFromMsg.Bonus
+                            player.Gender = userFromMsg.Gender
+                            player.Level = userFromMsg.Level
+                            player.IsOnline = userFromMsg.IsOnline
+                            adapter.notifyDataSetChanged()
+                            break
+                        }
                     }
                 }
             }
@@ -246,7 +250,18 @@ class GameActivity : AppCompatActivity() {
             game!!.senderId = AppUser.id
             game!!.rounds = round
             try {
-                hubConnection.send("SyncUser", gameId, gson.toJson(inGameUser))
+                val syncedUser = SyncedUser(
+                    senderId = AppUser.id,
+                    Bonus = inGameUser.Bonus,
+                    GameId = inGameUser.GameId,
+                    Gender = inGameUser.Gender,
+                    InGameUserId = inGameUser.InGameUserId,
+                    IsOnline = inGameUser.IsOnline,
+                    Level = inGameUser.Level,
+                    UserId = inGameUser.UserId,
+                    UserName = inGameUser.UserName
+                )
+                hubConnection.send("SyncUser", gameId, gson.toJson(syncedUser), AppUser.id)
             } catch (e: RuntimeException) {
                 Toast.makeText(
                     this@GameActivity,
