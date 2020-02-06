@@ -27,6 +27,7 @@ import com.kogero.levelcounter.models.Game
 import com.kogero.levelcounter.models.Gender
 import com.kogero.levelcounter.models.InGameUser
 import com.kogero.levelcounter.models.RecyclerViewClickListener
+import com.kogero.levelcounter.models.responses.SyncedTime
 import com.kogero.levelcounter.models.responses.SyncedUser
 import com.microsoft.signalr.HubConnection
 import com.microsoft.signalr.HubConnectionBuilder
@@ -48,6 +49,7 @@ class GameActivity : AppCompatActivity() {
     private var addedToGroup = false
     private var gameId: Int = 0
     private var isTimersInitialized = false
+    private var isTimeSynced = false
     var gameIsRunning = true
 
     var game: Game? = null
@@ -145,6 +147,17 @@ class GameActivity : AppCompatActivity() {
 
     private fun initHubConnection(ngrok_url: String) {
         hubConnection = HubConnectionBuilder.create(ngrok_url).build()
+        hubConnection.on("time", { message ->
+            val timeFromMsg = gson.fromJson(message, SyncedTime::class.java)
+            this@GameActivity.runOnUiThread {
+                if (game!!.hostingUserId != AppUser.id) {
+                    totalSecs = timeFromMsg.totalSecs
+                    startMills = timeFromMsg.startMills
+                    additionalSecs = timeFromMsg.additionalSecs
+                    isTimeSynced = true
+                }
+            }
+        }, String::class.java)
         hubConnection.on("round", { message ->
             val roundFromMsg = gson.fromJson(message, Int::class.java)
             this@GameActivity.runOnUiThread {
@@ -309,6 +322,29 @@ class GameActivity : AppCompatActivity() {
         try {
             try {
                 hubConnection.send("SyncRound", gameId, round)
+            } catch (e: RuntimeException) {
+                Toast.makeText(
+                    this@GameActivity,
+                    "Socket connection is not active.",
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun sendTimeWithSignalR(totalSecs: Long) {
+        addGameToSignalRGroup()
+        try {
+            try {
+                val syncedTime = SyncedTime(
+                    startMills = startMills,
+                    additionalSecs = additionalSecs,
+                    totalSecs = totalSecs
+                )
+                hubConnection.send("SyncTime", gameId, gson.toJson(syncedTime))
             } catch (e: RuntimeException) {
                 Toast.makeText(
                     this@GameActivity,
@@ -628,7 +664,11 @@ class GameActivity : AppCompatActivity() {
                                 game!!.senderId = AppUser.id
                                 updateGameOnServer()
                             }
-                            clock.text = TimeConverter.convertTimeFromLong(totalSecs)
+                            val time = TimeConverter.convertTimeFromLong(totalSecs)
+                            clock.text = time
+                            if (game != null && AppUser.id == game!!.hostingUserId) {
+                                sendTimeWithSignalR(totalSecs)
+                            }
                         }
                     }
                 } catch (e: InterruptedException) {
