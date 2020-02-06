@@ -79,6 +79,12 @@ class GameActivity : AppCompatActivity() {
             tvRound.text = "Round $round"
             sendGameStateWithSignalR()
         }
+        btnNextRound.setOnLongClickListener{
+            round--
+            tvRound.text = "Round $round"
+            sendGameStateWithSignalR()
+            return@setOnLongClickListener true
+        }
 
         val recyclerView = findViewById<RecyclerView>(R.id.rv_playerlist)
         recyclerView.layoutManager = LinearLayoutManager(this@GameActivity)
