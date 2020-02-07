@@ -2,7 +2,7 @@
 <network-security-config>
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">koger23.myftp.org</domain>
-        <domain includeSubdomains="true">192.168.0.100</domain>
-        <domain includeSubdomains="true">05b9b6e3.ngrok.io</domain>
+        <domain includeSubdomains="true">kogero.com</domain>
+        <domain includeSubdomains="true">ngrok.io</domain>
     </domain-config>
 </network-security-config>

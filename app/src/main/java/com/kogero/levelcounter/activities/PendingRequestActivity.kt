@@ -1,7 +1,8 @@
-package com.kogero.levelcounter.activites
+package com.kogero.levelcounter.activities
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
@@ -33,6 +34,7 @@ class PendingRequestActivity : AppCompatActivity(), AdapterView.OnItemClickListe
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pending_requests)
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_NOSENSOR
 
         val recyclerView = findViewById<RecyclerView>(R.id.rv_user_list)
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -75,21 +77,21 @@ class PendingRequestActivity : AppCompatActivity(), AdapterView.OnItemClickListe
                 call: Call<ResponseBody>,
                 response: Response<ResponseBody>
             ) {
-                Toast.makeText(
-                    context,
-                    "Code: " + response.code(),
-                    Toast.LENGTH_SHORT
-                )
-                    .show()
+                when {
+                    response.code() == 200 -> {
+                        userList.remove(userList[position])
+                        adapter.notifyItemRemoved(position)
 
-                if (response.code() == 200) {
-                    userList.remove(userList[position])
-                    adapter.notifyItemRemoved(position)
-
-                } else if (response.code() == 401) {
-                    Toast.makeText(context, "Login expired.", Toast.LENGTH_SHORT).show()
-                    val intent = Intent(context, LoginActivity::class.java)
-                    startActivity(intent)
+                    }
+                    response.code() == 401 -> {
+                        Toast.makeText(context, "Login expired.", Toast.LENGTH_SHORT).show()
+                        ApiClient.resetToken()
+                        val intent = Intent(context, LoginActivity::class.java)
+                        startActivity(intent)
+                    }
+                    response.code() / 100 == 5 -> {
+                        Toast.makeText(context, "Server Error", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
 
@@ -116,13 +118,6 @@ class PendingRequestActivity : AppCompatActivity(), AdapterView.OnItemClickListe
                 call: Call<ResponseBody>,
                 response: Response<ResponseBody>
             ) {
-                Toast.makeText(
-                    context,
-                    "Code: " + response.code(),
-                    Toast.LENGTH_SHORT
-                )
-                    .show()
-
                 if (response.code() == 200) {
                     userList.remove(userList[position])
                     adapter.notifyItemRemoved(position)

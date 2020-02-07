@@ -1,14 +1,18 @@
-package com.kogero.levelcounter.activites
+package com.kogero.levelcounter.activities
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.View
-import android.widget.*
+import android.widget.AdapterView
+import android.widget.SearchView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.kogero.levelcounter.*
+import com.kogero.levelcounter.MainActivity
+import com.kogero.levelcounter.R
 import com.kogero.levelcounter.adapters.UsersAdapter
 import com.kogero.levelcounter.api.ApiClient
 import com.kogero.levelcounter.listeners.RecyclerViewTouchListener
@@ -44,6 +48,7 @@ open class UsersActivity : AppCompatActivity(), AdapterView.OnItemClickListener 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.acitvity_users)
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_NOSENSOR
 
         val recyclerView = findViewById<RecyclerView>(R.id.rv_user_list)
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -91,12 +96,6 @@ open class UsersActivity : AppCompatActivity(), AdapterView.OnItemClickListener 
                 call: Call<Statistics>,
                 response: Response<Statistics>
             ) {
-                Toast.makeText(
-                    context,
-                    "Code: " + response.code(),
-                    Toast.LENGTH_SHORT
-                )
-                    .show()
                 val statistics: Statistics? = response.body()
                 if (response.code() == 200) {
                     if (statistics != null) {
@@ -110,6 +109,7 @@ open class UsersActivity : AppCompatActivity(), AdapterView.OnItemClickListener 
                     }
                 } else if (response.code() == 401) {
                     Toast.makeText(context, "Login expired.", Toast.LENGTH_SHORT).show()
+                    ApiClient.saveToken("")
                     val intent = Intent(context, LoginActivity::class.java)
                     startActivity(intent)
                 }
@@ -143,18 +143,20 @@ open class UsersActivity : AppCompatActivity(), AdapterView.OnItemClickListener 
                 )
                     .show()
                 val userResponseList: List<UserListViewModel>? = response.body()
-                if (response.code() == 200) {
-                    if (userResponseList != null) {
+                when {
+                    response.code() == 200 -> if (userResponseList != null) {
                         userList.clear()
                         for (user in userResponseList) {
                             userList.add(user)
                         }
                         adapter.notifyDataSetChanged()
                     }
-                } else if (response.code() == 401) {
-                    Toast.makeText(context, "Login expired.", Toast.LENGTH_SHORT).show()
-                    val intent = Intent(this@UsersActivity, MainActivity::class.java)
-                    startActivity(intent)
+                    response.code() == 401 -> {
+                        Toast.makeText(context, "Login expired.", Toast.LENGTH_SHORT).show()
+                        ApiClient.resetToken()
+                        val intent = Intent(this@UsersActivity, MainActivity::class.java)
+                        startActivity(intent)
+                    }
                 }
             }
 
@@ -167,10 +169,5 @@ open class UsersActivity : AppCompatActivity(), AdapterView.OnItemClickListener 
                     .show()
             }
         })
-    }
-
-    companion object {
-        fun newInstance(): FriendsActivity =
-            FriendsActivity()
     }
 }

@@ -7,6 +7,15 @@
         android:id="@+id/rv_load_game_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_weight="1"
         android:background="@color/munchkinYellow" />
+
+    <EditText
+        android:id="@+id/editTextLink"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="a7bbb174" />
 
 </LinearLayout>

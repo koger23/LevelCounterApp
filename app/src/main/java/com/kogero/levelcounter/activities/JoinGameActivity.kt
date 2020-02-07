@@ -1,16 +1,18 @@
-package com.kogero.levelcounter.activites
+package com.kogero.levelcounter.activities
 
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.View
+import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.kogero.levelcounter.api.ApiClient
 import com.kogero.levelcounter.R
-import com.kogero.levelcounter.listeners.RecyclerViewTouchListener
 import com.kogero.levelcounter.adapters.LoadGameAdapter
+import com.kogero.levelcounter.api.ApiClient
+import com.kogero.levelcounter.listeners.RecyclerViewTouchListener
 import com.kogero.levelcounter.models.Game
 import com.kogero.levelcounter.models.RecyclerViewClickListener
 import retrofit2.Call
@@ -24,6 +26,7 @@ class JoinGameActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_loadgame)
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_NOSENSOR
 
         val recyclerView = findViewById<RecyclerView>(R.id.rv_load_game_list)
         recyclerView.layoutManager = LinearLayoutManager(this@JoinGameActivity)
@@ -53,17 +56,29 @@ class JoinGameActivity : AppCompatActivity() {
                 call: Call<Game>,
                 response: Response<Game>
             ) {
-                Toast.makeText(
-                    this@JoinGameActivity,
-                    "Code: ${response.code()}",
-                    Toast.LENGTH_SHORT
-                ).show()
-                val game = response.body()
-                if (game != null) {
-                    val intent = Intent(this@JoinGameActivity, GameActivity::class.java)
-                    intent.putExtra("GAMEID", game.id)
-                    intent.putExtra("JOIN", 1)
-                    startActivity(intent)
+                when {
+                    response.code() == 200 -> {
+                        val game = response.body()
+                        if (game != null) {
+                            val intent = Intent(this@JoinGameActivity, GameActivity::class.java)
+                            intent.putExtra("GAMEID", game.id)
+                            intent.putExtra("JOIN", 1)
+                            val ngrockUrl = findViewById<EditText>(R.id.editTextLink).text.toString()
+                            intent.putExtra("NGROCK", ngrockUrl)
+                            startActivity(intent)
+                        }
+                    }
+                    response.code() == 401 -> {
+                        Toast.makeText(this@JoinGameActivity, "Login Expired.", Toast.LENGTH_SHORT)
+                            .show()
+                        ApiClient.resetToken()
+                        val intent = Intent(this@JoinGameActivity, LoginActivity::class.java)
+                        startActivity(intent)
+                    }
+                    response.code() / 100 == 5 -> {
+                        Toast.makeText(this@JoinGameActivity, "Server Error", Toast.LENGTH_SHORT)
+                            .show()
+                    }
                 }
             }
 
@@ -86,13 +101,8 @@ class JoinGameActivity : AppCompatActivity() {
                 call: Call<List<Game>>,
                 response: Response<List<Game>>
             ) {
-                Toast.makeText(
-                    this@JoinGameActivity,
-                    "Code: ${response.code()}",
-                    Toast.LENGTH_SHORT
-                ).show()
                 val games = response.body()
-                if (games!!.isNotEmpty()) {
+                if (!games.isNullOrEmpty()) {
                     gameList.clear()
                     for (player in games) {
                         gameList.add(player)

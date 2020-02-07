@@ -1,6 +1,7 @@
-package com.kogero.levelcounter.activites
+package com.kogero.levelcounter.activities
 
 import android.content.Context
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.widget.ImageView
 import android.widget.TextView
@@ -8,6 +9,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.kogero.levelcounter.api.ApiClient
 import com.kogero.levelcounter.R
+import com.kogero.levelcounter.helpers.TimeConverter
 import com.kogero.levelcounter.models.Statistics
 import retrofit2.Call
 import retrofit2.Callback
@@ -20,6 +22,7 @@ class StatisticsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.actitvity_playerstat)
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_NOSENSOR
 
         val userName = intent.extras.getString("USERNAME")
         val tvUserName = findViewById<TextView>(R.id.tvUserName)
@@ -37,7 +40,7 @@ class StatisticsActivity : AppCompatActivity() {
         tvWins.text = statistics.wins.toString()
 
         val tvTimePlayed = findViewById<TextView>(R.id.tvTimePlayed)
-        tvTimePlayed.text = statistics.playTime.toString()
+        tvTimePlayed.text = TimeConverter.convertTimeFromLong(statistics.playTime.toLong())
 
         val relationshipId = intent.extras.getInt("RELATIONSHIPID")
         val isFriend = intent.extras.getBoolean("ISFRIEND")

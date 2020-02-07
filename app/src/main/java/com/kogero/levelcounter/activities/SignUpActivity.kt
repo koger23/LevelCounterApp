@@ -1,5 +1,6 @@
-package com.kogero.levelcounter.activites
+package com.kogero.levelcounter.activities
 
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -7,8 +8,8 @@ import android.widget.EditText
 import android.widget.RadioButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.kogero.levelcounter.api.ApiClient
 import com.kogero.levelcounter.R
+import com.kogero.levelcounter.api.ApiClient
 import com.kogero.levelcounter.models.requests.SignUpRequest
 import com.kogero.levelcounter.models.responses.SignUpResponse
 import retrofit2.Call
@@ -22,6 +23,7 @@ class SignUpActivity : AppCompatActivity() {
         window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
         actionBar?.hide()
         setContentView(R.layout.activity_signup)
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_NOSENSOR
 
         val btnSignUp = findViewById<Button>(R.id.buttonSignUp)
         btnSignUp.setOnClickListener {
@@ -58,21 +60,26 @@ class SignUpActivity : AppCompatActivity() {
                 call: Call<SignUpResponse>,
                 response: Response<SignUpResponse>
             ) {
-                if (response.code() == 201) {
-                    Toast.makeText(
-                        this@SignUpActivity,
-                        "Registration successful",
-                        Toast.LENGTH_SHORT
-                    )
-                        .show()
-                    this@SignUpActivity.finish()
-                } else if (response.code() == 400) {
-                    Toast.makeText(
+                when {
+                    response.code() == 201 -> {
+                        Toast.makeText(
+                            this@SignUpActivity,
+                            "Registration successful",
+                            Toast.LENGTH_SHORT
+                        )
+                            .show()
+                        this@SignUpActivity.finish()
+                    }
+                    response.code() == 400 -> Toast.makeText(
                         this@SignUpActivity,
                         "Error: ${response.body()!!.ErrorMessages}",
                         Toast.LENGTH_LONG
                     )
                         .show()
+                    response.code() / 100 == 5 -> {
+                        Toast.makeText(this@SignUpActivity, "Server Error", Toast.LENGTH_SHORT)
+                            .show()
+                    }
                 }
             }
 

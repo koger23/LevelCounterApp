@@ -1,7 +1,8 @@
-package com.kogero.levelcounter.activites
+package com.kogero.levelcounter.activities
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
@@ -49,6 +50,7 @@ class FriendsActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_friends)
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_NOSENSOR
 
         val btnSearch = findViewById<ImageButton>(R.id.btnSearch)
         btnSearch.setOnClickListener {
@@ -87,8 +89,6 @@ class FriendsActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                 call: Call<List<UserListViewModel>>,
                 response: Response<List<UserListViewModel>>
             ) {
-                Toast.makeText(this@FriendsActivity, "Code: " + response.code(), Toast.LENGTH_SHORT)
-                    .show()
                 val userData: List<UserListViewModel>? = response.body()
                 if (response.code() == 200) {
                     if (userData != null) {
@@ -127,12 +127,6 @@ class FriendsActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                 call: Call<List<UserListViewModel>>,
                 response: Response<List<UserListViewModel>>
             ) {
-                Toast.makeText(
-                    context,
-                    "Code: " + response.code(),
-                    Toast.LENGTH_SHORT
-                )
-                    .show()
                 val pendingRequests: List<UserListViewModel>? = response.body()
                 if (response.code() == 200) {
                     if (pendingRequests != null && pendingRequests.isNotEmpty()) {
@@ -146,6 +140,7 @@ class FriendsActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                     }
                 } else if (response.code() == 401) {
                     Toast.makeText(context, "Login expired.", Toast.LENGTH_SHORT).show()
+                    ApiClient.resetToken()
                     val intent = Intent(context, MainActivity::class.java)
                     startActivity(intent)
                 }
@@ -173,12 +168,6 @@ class FriendsActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                 call: Call<Statistics>,
                 response: Response<Statistics>
             ) {
-                Toast.makeText(
-                    context,
-                    "Code: " + response.code(),
-                    Toast.LENGTH_SHORT
-                )
-                    .show()
                 val statistics: Statistics? = response.body()
                 if (response.code() == 200) {
                     if (statistics != null) {

@@ -1,13 +1,16 @@
-package com.kogero.levelcounter.activites
+package com.kogero.levelcounter.activities
 
 import android.app.AlertDialog
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.UiThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -16,6 +19,7 @@ import com.kogero.levelcounter.R
 import com.kogero.levelcounter.adapters.GameAdapter
 import com.kogero.levelcounter.api.ApiClient
 import com.kogero.levelcounter.helpers.AppUser
+import com.kogero.levelcounter.helpers.HttpsTrustManager
 import com.kogero.levelcounter.helpers.TimeConverter
 import com.kogero.levelcounter.hub.HubConnectionTask
 import com.kogero.levelcounter.listeners.RecyclerViewTouchListener
@@ -23,8 +27,11 @@ import com.kogero.levelcounter.models.Game
 import com.kogero.levelcounter.models.Gender
 import com.kogero.levelcounter.models.InGameUser
 import com.kogero.levelcounter.models.RecyclerViewClickListener
+import com.kogero.levelcounter.models.responses.SyncedTime
+import com.kogero.levelcounter.models.responses.SyncedUser
 import com.microsoft.signalr.HubConnection
 import com.microsoft.signalr.HubConnectionBuilder
+import com.microsoft.signalr.HubConnectionState
 import kotlinx.android.synthetic.main.activity_game.*
 import okhttp3.ResponseBody
 import retrofit2.Call
@@ -41,36 +48,31 @@ class GameActivity : AppCompatActivity() {
     private var isFirstStart = true
     private var addedToGroup = false
     private var gameId: Int = 0
+    private var isTimersInitialized = false
+    private var isTimeSynced = false
     var gameIsRunning = true
+    private lateinit var playerJoined: Array<String>
 
     var game: Game? = null
     var joinGame = 0
+    var playerCountDownTimers: HashMap<String, CountDownTimer> = HashMap()
     var playerList: ArrayList<InGameUser> = ArrayList()
     val adapter = GameAdapter(this, playerList)
     private val gson = Gson()
     private lateinit var hubConnection: HubConnection
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game)
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_NOSENSOR
 
-        hubConnection = HubConnectionBuilder.create("${ApiClient.SITE_URL}game").build()
-        hubConnection.on("Send", {}, String::class.java)
-        hubConnection.on("broadcastMessage", { message ->
-            val gameFromMsg = gson.fromJson(message, Game::class.java)
-            this@GameActivity.runOnUiThread {
-                if (gameFromMsg.senderId != AppUser.id) {
-                    updateGame(gameFromMsg)
-                }
-            }
-        }, String::class.java)
-
-        val connection = HubConnectionTask().execute(hubConnection)
+        HttpsTrustManager.allowAllSSL()
 
         gameId = intent.getIntExtra("GAMEID", 1)
         joinGame = intent.getIntExtra("JOIN", 0)
-
+        var ngrok = "https://" + intent.getStringExtra("NGROCK") + ".ngrok.io/game"
+        initHubConnection(ngrok)
+        addGameToSignalRGroup()
         getGame(gameId)
 
         val tvRound = findViewById<TextView>(R.id.tvRound)
@@ -80,7 +82,17 @@ class GameActivity : AppCompatActivity() {
         btnNextRound.setOnClickListener {
             round++
             tvRound.text = "Round $round"
-            sendGameStateWithSignalR()
+//            sendGameStateWithSignalR()
+            sendRoundsWithSignalR(round)
+        }
+        btnNextRound.setOnLongClickListener {
+            if (round > 1) {
+                round--
+                tvRound.text = "Round $round"
+//            sendGameStateWithSignalR()
+                sendRoundsWithSignalR(round)
+            }
+            return@setOnLongClickListener true
         }
 
         val recyclerView = findViewById<RecyclerView>(R.id.rv_playerlist)
@@ -104,15 +116,11 @@ class GameActivity : AppCompatActivity() {
                         }
                         playerList[adapter.selectedPosition].Gender = playerGender
                         adapter.notifyDataSetChanged()
-                        sendGameStateWithSignalR()
+//                        sendGameStateWithSignalR()
+                        sendUserWithSignalR(playerList[adapter.selectedPosition])
                     }
                 })
         )
-
-        if (isFirstStart) {
-            startClock()
-            isFirstStart = false
-        }
 
         val btnBonusPlus = findViewById<ImageButton>(R.id.btnBonusPlus)
         btnBonusPlus.setOnClickListener {
@@ -130,6 +138,140 @@ class GameActivity : AppCompatActivity() {
         btnLevelMinus.setOnClickListener {
             decreaseLevel(playerList[adapter.selectedPosition])
         }
+
+        if (isFirstStart) {
+            startClock()
+            heartBeat()
+            isFirstStart = false
+        }
+    }
+
+    private fun initHubConnection(ngrok_url: String) {
+        hubConnection = HubConnectionBuilder.create(ngrok_url).build()
+
+        hubConnection.on("playerJoined", { message ->
+            val playerFromMsg = gson.fromJson(message, InGameUser::class.java)
+            this@GameActivity.runOnUiThread {
+                if (game!!.hostingUserId == AppUser.id) {
+                    sendGameStateWithSignalR()
+                }
+            }
+        }, String::class.java)
+        hubConnection.on("time", { message ->
+            val timeFromMsg = gson.fromJson(message, SyncedTime::class.java)
+            this@GameActivity.runOnUiThread {
+                if (game!!.hostingUserId != AppUser.id) {
+                    totalSecs = timeFromMsg.totalSecs
+                    startMills = timeFromMsg.startMills
+                    additionalSecs = timeFromMsg.additionalSecs
+                    isTimeSynced = true
+                }
+            }
+        }, String::class.java)
+        hubConnection.on("round", { message ->
+            val roundFromMsg = gson.fromJson(message, Int::class.java)
+            this@GameActivity.runOnUiThread {
+                if (game!!.hostingUserId != AppUser.id) {
+                    round = roundFromMsg
+                    tvRound.text = "Round $round"
+                }
+            }
+        }, String::class.java)
+        hubConnection.on("user", { message ->
+            val userFromMsg = gson.fromJson(message, SyncedUser::class.java)
+            this@GameActivity.runOnUiThread {
+                if (userFromMsg.senderId != AppUser.id) {
+                    for (player in game!!.inGameUsers) {
+                        if (player.UserId == userFromMsg.UserId) {
+                            player.Bonus = userFromMsg.Bonus
+                            player.Gender = userFromMsg.Gender
+                            player.Level = userFromMsg.Level
+                            player.IsOnline = userFromMsg.IsOnline
+                            adapter.notifyDataSetChanged()
+                            break
+                        }
+                    }
+                }
+            }
+        }, String::class.java)
+        hubConnection.on("broadcastMessage", { message ->
+            val gameFromMsg = gson.fromJson(message, Game::class.java)
+            this@GameActivity.runOnUiThread {
+                if (gameFromMsg.senderId != AppUser.id) {
+                    updateGame(gameFromMsg)
+                }
+            }
+        }, String::class.java)
+        hubConnection.on("isOnline", { message ->
+            val userIdFromMessage = gson.fromJson(message, String::class.java)
+            this@GameActivity.runOnUiThread {
+                for (i in playerList.indices) {
+                    if (playerList[i].UserId == userIdFromMessage) {
+                        playerList[i].IsOnline = true
+                        adapter.notifyDataSetChanged()
+                        if (game != null && playerCountDownTimers.isNotEmpty()) {
+                            playerCountDownTimers[userIdFromMessage]!!.cancel()
+                            playerCountDownTimers[userIdFromMessage]!!.start()
+                        }
+                    }
+                }
+            }
+        }, String::class.java)
+
+        HubConnectionTask().execute(hubConnection)
+    }
+
+    private fun initCountDownTimers(playerList: List<InGameUser>) {
+        if (joinGame == 0 && !isTimersInitialized) {
+            for (player in playerList) {
+                val counter = object : CountDownTimer(5000, 1000) {
+                    override fun onTick(millisUntilFinished: Long) {
+                    }
+
+                    override fun onFinish() {
+                        setPlayerOffline(player.UserId)
+                        sendGameStateWithSignalR()
+                        adapter.notifyDataSetChanged()
+                    }
+                }
+                playerCountDownTimers[player.UserId] = counter
+                counter.start()
+            }
+        }
+    }
+
+    private fun setPlayerOffline(userId: String) {
+        for (player in game!!.inGameUsers) {
+            if (player.UserId == userId) {
+                player.IsOnline = false
+                break
+            }
+        }
+    }
+
+    private fun heartBeat() {
+        val heartBeatThread = object : Thread() {
+
+            override fun run() {
+                try {
+                    while (gameIsRunning) {
+                        sleep(1000)
+                        runOnUiThread {
+                            if (hubConnection.connectionState == HubConnectionState.CONNECTED) {
+                                hubConnection.send("HeartBeat", gameId, AppUser.id)
+                                adapter.notifyDataSetChanged()
+                            }
+                        }
+                    }
+                } catch (e: InterruptedException) {
+                    println(e.stackTrace)
+                }
+            }
+        }
+        heartBeatThread.start()
+        if (!gameIsRunning) {
+            heartBeatThread.interrupt()
+        }
     }
 
     private fun updateRounds(rounds: Int) {
@@ -137,23 +279,107 @@ class GameActivity : AppCompatActivity() {
         tvRound.text = "Round $round"
     }
 
-    private fun sendGameStateWithSignalR() {
-        if (!addedToGroup) {
+    private fun sendUserWithSignalR(inGameUser: InGameUser) {
+        addGameToSignalRGroup()
+        try {
+            game!!.senderId = AppUser.id
+            game!!.rounds = round
+            try {
+                val syncedUser = SyncedUser(
+                    senderId = AppUser.id,
+                    Bonus = inGameUser.Bonus,
+                    GameId = inGameUser.GameId,
+                    Gender = inGameUser.Gender,
+                    InGameUserId = inGameUser.InGameUserId,
+                    IsOnline = inGameUser.IsOnline,
+                    Level = inGameUser.Level,
+                    UserId = inGameUser.UserId,
+                    UserName = inGameUser.UserName
+                )
+                hubConnection.send("SyncUser", gameId, gson.toJson(syncedUser), AppUser.id)
+            } catch (e: RuntimeException) {
+                Toast.makeText(
+                    this@GameActivity,
+                    "Socket connection is not active.",
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun addGameToSignalRGroup() {
+        if (!addedToGroup || hubConnection.connectionState != HubConnectionState.CONNECTED) {
             try {
                 hubConnection.send("AddToGroup", gameId, AppUser.id)
                 addedToGroup = false
             } catch (e: RuntimeException) {
-                Toast.makeText(this@GameActivity, "Socket connection is not active.", Toast.LENGTH_SHORT)
+                Toast.makeText(
+                    this@GameActivity,
+                    "Socket connection is not active.",
+                    Toast.LENGTH_SHORT
+                )
                     .show()
             }
         }
+    }
+
+    private fun sendRoundsWithSignalR(round: Int) {
+        addGameToSignalRGroup()
+        try {
+            try {
+                hubConnection.send("SyncRound", gameId, round)
+            } catch (e: RuntimeException) {
+                Toast.makeText(
+                    this@GameActivity,
+                    "Socket connection is not active.",
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun sendTimeWithSignalR(totalSecs: Long) {
+        addGameToSignalRGroup()
+        try {
+            try {
+                val syncedTime = SyncedTime(
+                    startMills = startMills,
+                    additionalSecs = additionalSecs,
+                    totalSecs = totalSecs
+                )
+                hubConnection.send("SyncTime", gameId, gson.toJson(syncedTime))
+            } catch (e: RuntimeException) {
+                Toast.makeText(
+                    this@GameActivity,
+                    "Socket connection is not active.",
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun sendGameStateWithSignalR() {
+        addGameToSignalRGroup()
         try {
             game!!.senderId = AppUser.id
             game!!.rounds = round
             try {
                 hubConnection.send("Send", gson.toJson(game), gameId)
             } catch (e: RuntimeException) {
-                Toast.makeText(this@GameActivity, "Socket connection is not active.", Toast.LENGTH_SHORT)
+                Toast.makeText(
+                    this@GameActivity,
+                    "Socket connection is not active.",
+                    Toast.LENGTH_SHORT
+                )
                     .show()
             }
         } catch (e: Exception) {
@@ -197,7 +423,8 @@ class GameActivity : AppCompatActivity() {
         if (adapter.selectedPosition != -1 && (checkUserIsHost() || inGameUser.UserId == AppUser.id)) {
             inGameUser.Bonus++
             adapter.notifyDataSetChanged()
-            sendGameStateWithSignalR()
+//            sendGameStateWithSignalR()
+            sendUserWithSignalR(inGameUser)
         }
     }
 
@@ -205,7 +432,8 @@ class GameActivity : AppCompatActivity() {
         if (adapter.selectedPosition != -1 && inGameUser.Bonus > 0 && (checkUserIsHost() || inGameUser.UserId == AppUser.id)) {
             inGameUser.Bonus--
             adapter.notifyDataSetChanged()
-            sendGameStateWithSignalR()
+//            sendGameStateWithSignalR()
+            sendUserWithSignalR(inGameUser)
         }
     }
 
@@ -213,7 +441,8 @@ class GameActivity : AppCompatActivity() {
         if (adapter.selectedPosition != -1 && (checkUserIsHost() || inGameUser.UserId == AppUser.id)) {
             inGameUser.Level++
             adapter.notifyDataSetChanged()
-            sendGameStateWithSignalR()
+//            sendGameStateWithSignalR()
+            sendUserWithSignalR(inGameUser)
         }
     }
 
@@ -221,7 +450,8 @@ class GameActivity : AppCompatActivity() {
         if (adapter.selectedPosition != -1 && inGameUser.Level > 1 && (checkUserIsHost() || inGameUser.UserId == AppUser.id)) {
             inGameUser.Level--
             adapter.notifyDataSetChanged()
-            sendGameStateWithSignalR()
+//            sendGameStateWithSignalR()
+            sendUserWithSignalR(inGameUser)
         }
     }
 
@@ -237,23 +467,39 @@ class GameActivity : AppCompatActivity() {
                 call: Call<Game>,
                 response: Response<Game>
             ) {
-                Toast.makeText(
-                    this@GameActivity,
-                    "Code: ${response.code()}",
-                    Toast.LENGTH_SHORT
-                ).show()
-                if (response.code() == 200) {
-                    game = response.body()
-                    updateRounds(game!!.rounds)
-                    if (game!!.hostingUserId != AppUser.id) {
-                        btnNextRound.visibility = View.INVISIBLE
-                    }
-                    if (game!!.inGameUsers.isNotEmpty()) {
-                        playerList.clear()
-                        for (player in game!!.inGameUsers) {
-                            playerList.add(player)
+                when {
+                    response.code() == 200 -> {
+                        game = response.body()
+                        updateRounds(game!!.rounds)
+                        if (game!!.hostingUserId != AppUser.id) {
+                            btnNextRound.visibility = View.INVISIBLE
                         }
-                        adapter.notifyDataSetChanged()
+                        if (game!!.inGameUsers.isNotEmpty()) {
+                            playerList.clear()
+                            for (player in game!!.inGameUsers) {
+                                playerList.add(player)
+                            }
+                            adapter.notifyDataSetChanged()
+                            initCountDownTimers(playerList)
+//                            while (hubConnection.connectionState != HubConnectionState.CONNECTED) {
+//                                if (hubConnection.connectionState == HubConnectionState.CONNECTED) {
+//                                    if (game!!.hostingUserId == AppUser.id) {
+//                                        sendGameStateWithSignalR()
+//                                    }
+//                                    break
+//                                }
+//                            }
+                        }
+                    }
+                    response.code() == 401 -> {
+                        Toast.makeText(this@GameActivity, "Login Expired.", Toast.LENGTH_SHORT)
+                            .show()
+                        ApiClient.resetToken()
+                        val intent = Intent(this@GameActivity, LoginActivity::class.java)
+                        startActivity(intent)
+                    }
+                    response.code() / 100 == 5 -> {
+                        Toast.makeText(this@GameActivity, "Server Error", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -289,6 +535,9 @@ class GameActivity : AppCompatActivity() {
             .setTitle("Quit")
             .setMessage("Are you sure to quit?")
             .setNeutralButton("Yes") { _, _ ->
+                gameIsRunning = false
+//                sendGameStateWithSignalR()
+                hubConnection.stop()
                 startActivity(i)
                 finish()
             }
@@ -410,6 +659,7 @@ class GameActivity : AppCompatActivity() {
             override fun run() {
                 try {
                     while (gameIsRunning) {
+
                         sleep(1000)
                         runOnUiThread {
                             totalSecs =
@@ -423,7 +673,14 @@ class GameActivity : AppCompatActivity() {
                                 game!!.senderId = AppUser.id
                                 updateGameOnServer()
                             }
-                            clock.text = TimeConverter.convertTimeFromLong(totalSecs)
+                            val time = TimeConverter.convertTimeFromLong(totalSecs)
+                            clock.text = time
+                            if (game != null && AppUser.id == game!!.hostingUserId) {
+                                sendTimeWithSignalR(totalSecs)
+                            }
+                            if (joinGame == 1) {
+                                addGameToSignalRGroup()
+                            }
                         }
                     }
                 } catch (e: InterruptedException) {

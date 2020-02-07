@@ -1,16 +1,17 @@
-package com.kogero.levelcounter.activites
+package com.kogero.levelcounter.activities
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.kogero.levelcounter.api.ApiClient
-import com.kogero.levelcounter.MainActivity
 import com.kogero.levelcounter.R
+import com.kogero.levelcounter.api.ApiClient
+import com.kogero.levelcounter.helpers.TimeConverter
 import com.kogero.levelcounter.models.Statistics
 import retrofit2.Call
 import retrofit2.Callback
@@ -22,6 +23,7 @@ class PersonalStatisticsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.actitvity_playerstat)
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_NOSENSOR
 
         val userName = "YOU"
         val tvUserName = findViewById<TextView>(R.id.tvUserName)
@@ -33,11 +35,6 @@ class PersonalStatisticsActivity : AppCompatActivity() {
         getPersonalStats(this@PersonalStatisticsActivity)
     }
 
-    companion object {
-        fun newInstance(): FriendsActivity =
-            FriendsActivity()
-    }
-
     private fun getPersonalStats(
         context: Context
     ) {
@@ -46,15 +43,19 @@ class PersonalStatisticsActivity : AppCompatActivity() {
         call.enqueue(object : Callback<Statistics> {
 
             override fun onResponse(call: Call<Statistics>, response: Response<Statistics>) {
-                if (response.code() == 200) {
-                    val statistics = response.body()
-                    if (statistics != null) {
-                        setView(statistics)
+                when {
+                    response.code() == 200 -> {
+                        val statistics = response.body()
+                        if (statistics != null) {
+                            setView(statistics)
+                        }
                     }
-                } else if (response!!.code() == 401) {
-                    Toast.makeText(context, "Login expired.", Toast.LENGTH_SHORT).show()
-                    val intent = Intent(context, LoginActivity::class.java)
-                    startActivity(intent)
+                    response!!.code() == 401 -> {
+                        Toast.makeText(context, "Login expired.", Toast.LENGTH_SHORT).show()
+                        ApiClient.saveToken("")
+                        val intent = Intent(context, LoginActivity::class.java)
+                        startActivity(intent)
+                    }
                 }
             }
 
@@ -77,6 +78,6 @@ class PersonalStatisticsActivity : AppCompatActivity() {
         tvGamesPlayed.text = statistics.gamesPlayed.toString()
         tvRoundsPlayed.text = statistics.roundsPlayed.toString()
         tvWins.text = statistics.wins.toString()
-        tvTimePlayed.text = statistics.playTime.toString()
+        tvTimePlayed.text = TimeConverter.convertTimeFromLong(statistics.playTime.toLong())
     }
 }

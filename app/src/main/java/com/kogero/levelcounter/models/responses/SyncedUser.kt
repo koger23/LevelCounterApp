@@ -1,9 +1,10 @@
-package com.kogero.levelcounter.models
+package com.kogero.levelcounter.models.responses
 
 import com.google.gson.annotations.SerializedName
+import com.kogero.levelcounter.models.Gender
 import java.io.Serializable
 
-data class InGameUser (
+data class SyncedUser (
     @SerializedName("inGameUserId")
     val InGameUserId: Int,
     @SerializedName("userId")
@@ -19,5 +20,7 @@ data class InGameUser (
     @SerializedName("gender")
     var Gender: Gender = com.kogero.levelcounter.models.Gender.MALE,
     @SerializedName("isOnline")
-    var IsOnline: Boolean = false
+    var IsOnline: Boolean = false,
+    @SerializedName("senderId")
+    var senderId: String
 ) : Serializable

@@ -1,10 +1,12 @@
-package com.kogero.levelcounter.activites
+package com.kogero.levelcounter.activities
 
 import android.app.AlertDialog
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
+import com.kogero.levelcounter.MainActivity
 import com.kogero.levelcounter.R
 import kotlin.system.exitProcess
 
@@ -12,6 +14,7 @@ class MainMenuActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_mainmenu)
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_NOSENSOR
 
         val btnNewGame = findViewById<Button>(R.id.btnNewGame)
         btnNewGame.setOnClickListener {
@@ -34,6 +37,9 @@ class MainMenuActivity : AppCompatActivity() {
             startActivity(intent)}
 
         val btnProfile = findViewById<Button>(R.id.btnProfile)
+        btnProfile.setOnClickListener {
+            val intent = Intent(this, ProfileActivity::class.java)
+            startActivity(intent)}
 
         val btnFriends = findViewById<Button>(R.id.btnFriends)
         btnFriends.setOnClickListener {
@@ -58,6 +64,7 @@ class MainMenuActivity : AppCompatActivity() {
             .setPositiveButton("Yes") { _, _ ->
                 moveTaskToBack(true)
                 android.os.Process.killProcess(android.os.Process.myPid())
+                LoginActivity().clearUserPreferences()
                 exitProcess(1)
             }
             .setNegativeButton("No", null)
