@@ -71,7 +71,7 @@
             android:layout_marginBottom="28dp"
             android:ems="10"
             android:inputType="textPersonName"
-            android:text="bd47aae2"
+            android:text="a7bbb174"
             app:layout_constraintBottom_toTopOf="@+id/btnStartGame"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
