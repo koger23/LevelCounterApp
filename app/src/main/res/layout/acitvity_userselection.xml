@@ -74,7 +74,19 @@
             android:text="a7bbb174"
             app:layout_constraintBottom_toTopOf="@+id/btnStartGame"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/dedicatedswitch" />
+
+        <Switch
+            android:id="@+id/dedicatedswitch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Dedicated"
+            android:textColor="@color/white"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.498"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/searchbar" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

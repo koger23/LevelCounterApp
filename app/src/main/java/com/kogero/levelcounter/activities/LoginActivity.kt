@@ -132,6 +132,9 @@ class LoginActivity : AppCompatActivity() {
 
         // Get value
         UnameValue = settings.getString(PREF_UNAME, DefaultUnameValue)
+        if (UnameValue != null) {
+            appUser.name = UnameValue!!
+        }
         PasswordValue = settings.getString(PREF_PASSWORD, DEFAULT_PASSWORD)
         val userNameField = findViewById<EditText>(R.id.editTextUserName)
         val passwordField = findViewById<EditText>(R.id.editTextPassword)
@@ -157,6 +160,9 @@ class LoginActivity : AppCompatActivity() {
                         token = response.body()!!.token
                         ApiClient.saveToken(token)
                         appUser.id = JWTUtils().decode(token).toString()
+                        if (UnameValue != null) {
+                            appUser.name = UnameValue!!
+                        }
                         saveUserId()
                         savePreferences()
                         val intent = Intent(context, MainMenuActivity::class.java)

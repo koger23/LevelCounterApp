@@ -4,10 +4,7 @@ import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ProgressBar
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -15,6 +12,8 @@ import com.kogero.levelcounter.api.ApiClient
 import com.kogero.levelcounter.R
 import com.kogero.levelcounter.listeners.RecyclerViewTouchListener
 import com.kogero.levelcounter.adapters.NewGameSelectionAdapter
+import com.kogero.levelcounter.helpers.AppUser
+import com.kogero.levelcounter.helpers.PlayerNumberException
 import com.kogero.levelcounter.models.Game
 import com.kogero.levelcounter.models.RecyclerViewClickListener
 import com.kogero.levelcounter.models.UserListViewModel
@@ -23,6 +22,7 @@ import com.kogero.levelcounter.models.requests.InGameUserCreationRequest
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.lang.Exception
 
 class NewGameSelectionActivity : AppCompatActivity() {
 
@@ -31,6 +31,8 @@ class NewGameSelectionActivity : AppCompatActivity() {
     private var ngrockUrl = ""
     var adapter = NewGameSelectionAdapter(this, viewModels)
     var progressBar: ProgressBar? = null
+    lateinit var btnDedicated: Switch
+    var dedicated = false
 
     override fun onRestart() {
         super.onRestart()
@@ -76,6 +78,8 @@ class NewGameSelectionActivity : AppCompatActivity() {
             progressBar!!.visibility = View.VISIBLE
             createGame()
         }
+        btnDedicated = findViewById(R.id.dedicatedswitch)
+        dedicated = btnDedicated.isChecked
     }
 
     private fun createGame() {
@@ -92,11 +96,19 @@ class NewGameSelectionActivity : AppCompatActivity() {
 //                            .show()
                         addInGameUsers(game.id)
                     } else {
-                        Toast.makeText(this@NewGameSelectionActivity, "Game with not exists" + response.code(), Toast.LENGTH_LONG)
+                        Toast.makeText(
+                            this@NewGameSelectionActivity,
+                            "Game with not exists" + response.code(),
+                            Toast.LENGTH_LONG
+                        )
                             .show()
                     }
                 } else {
-                    Toast.makeText(this@NewGameSelectionActivity, "Error when creating game: ${response.code()}", Toast.LENGTH_LONG)
+                    Toast.makeText(
+                        this@NewGameSelectionActivity,
+                        "Error when creating game: ${response.code()}",
+                        Toast.LENGTH_LONG
+                    )
                         .show()
                 }
             }
@@ -113,54 +125,100 @@ class NewGameSelectionActivity : AppCompatActivity() {
     }
 
     private fun addInGameUsers(gameId: Int) {
-        val call: Call<Game> = ApiClient.getClient.addInGameUsers(createInGameRequest(gameId))
-        call.enqueue(object : Callback<Game> {
-            override fun onResponse(
-                call: Call<Game>,
-                response: Response<Game>
-            ) {
-                val game: Game? = response.body()
-                if (response.code() == 200) {
-                    if (game != null) {
-                        val intent = Intent(this@NewGameSelectionActivity, GameActivity::class.java)
-                        ngrockUrl = findViewById<EditText>(R.id.editTextLink).text.toString()
-                        println("----> OnLoad: $ngrockUrl")
-                        intent.putExtra("GAMEID", game.id)
-                        intent.putExtra("JOIN", 0)
-                        intent.putExtra("NGROCK", ngrockUrl)
-                        progressBar!!.visibility = View.INVISIBLE
-                        startActivity(intent)
-                    } else {
-                        Toast.makeText(this@NewGameSelectionActivity, "Game with not exists" + response.code(), Toast.LENGTH_LONG)
-                            .show()
-                    }
-                } else {
-                    Toast.makeText(this@NewGameSelectionActivity, "Error while adding players: " + response.code(), Toast.LENGTH_LONG)
-                        .show()
-                }
-            }
-
-            override fun onFailure(call: Call<Game>, t: Throwable) {
-                Toast.makeText(
-                    this@NewGameSelectionActivity,
-                    "Could not connect to the server when try to add players",
-                    Toast.LENGTH_SHORT
-                )
+        var request = InGameUserCreationRequest(-1, ArrayList())
+        try {
+            request = createInGameRequest(gameId)
+        } catch (e: PlayerNumberException) {
+            if (dedicated) {
+                progressBar!!.visibility = View.INVISIBLE
+                Toast.makeText(this, e.message, Toast.LENGTH_LONG)
+                    .show()
+            } else {
+                progressBar!!.visibility = View.INVISIBLE
+                Toast.makeText(this, e.message, Toast.LENGTH_LONG)
                     .show()
             }
-        })
+        }
+        if (request.gameId != -1) {
+            val call: Call<Game> = ApiClient.getClient.addInGameUsers(request)
+            call.enqueue(object : Callback<Game> {
+                override fun onResponse(
+                    call: Call<Game>,
+                    response: Response<Game>
+                ) {
+                    val game: Game? = response.body()
+                    if (response.code() == 200) {
+                        if (game != null) {
+                            val intent =
+                                Intent(this@NewGameSelectionActivity, GameActivity::class.java)
+                            ngrockUrl = findViewById<EditText>(R.id.editTextLink).text.toString()
+                            Toast.makeText(
+                                this@NewGameSelectionActivity,
+                                dedicated.toString(),
+                                Toast.LENGTH_LONG
+                            )
+                                .show()
+                            println("----> OnLoad: $ngrockUrl")
+                            intent.putExtra("GAMEID", game.id)
+                            intent.putExtra("JOIN", 0)
+                            intent.putExtra("NGROCK", ngrockUrl)
+                            intent.putExtra("DEDICATED", dedicated)
+                            progressBar!!.visibility = View.INVISIBLE
+                            startActivity(intent)
+                        } else {
+                            Toast.makeText(
+                                this@NewGameSelectionActivity,
+                                "Game with not exists" + response.code(),
+                                Toast.LENGTH_LONG
+                            )
+                                .show()
+                        }
+                    } else {
+                        Toast.makeText(
+                            this@NewGameSelectionActivity,
+                            "Error while adding players: " + response.code(),
+                            Toast.LENGTH_LONG
+                        )
+                            .show()
+                    }
+                }
+
+                override fun onFailure(call: Call<Game>, t: Throwable) {
+                    Toast.makeText(
+                        this@NewGameSelectionActivity,
+                        "Could not connect to the server when try to add players",
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+                }
+            })
+        }
+
     }
 
     private fun createInGameRequest(gameId: Int): InGameUserCreationRequest {
-        return InGameUserCreationRequest(gameId, getSelectedPlayerNames())
+        var playerNames = getSelectedPlayerNames()
+        if (dedicated && playerNames.size < 2) {
+            throw PlayerNumberException("Select minimum 2 players")
+        } else if (!dedicated && playerNames.size < 1) {
+            throw PlayerNumberException("Select minimum 1 player")
+        }
+        return InGameUserCreationRequest(gameId, playerNames)
     }
 
     private fun getSelectedPlayerNames(): ArrayList<String> {
         val selectedPlayerNames = ArrayList<String>()
+        dedicated = btnDedicated.isChecked
         for (playerName in viewModels) {
             if (playerName.isSelected) {
-                selectedPlayerNames.add(playerName.user.userName)
+                if (!dedicated)
+                    selectedPlayerNames.add(playerName.user.userName)
+                else if (dedicated && playerName.user.userName != AppUser.id)
+                    selectedPlayerNames.add(playerName.user.userName)
             }
+        }
+        if (!dedicated) {
+            selectedPlayerNames.add(AppUser.name)
         }
         return selectedPlayerNames
     }
@@ -185,13 +243,21 @@ class NewGameSelectionActivity : AppCompatActivity() {
                         adapter.notifyDataSetChanged()
                     }
                 } else if (response.code() == 401) {
-                    Toast.makeText(this@NewGameSelectionActivity, "Login expired.", Toast.LENGTH_SHORT)
+                    Toast.makeText(
+                        this@NewGameSelectionActivity,
+                        "Login expired.",
+                        Toast.LENGTH_SHORT
+                    )
                         .show()
                     ApiClient.resetToken()
                     val intent = Intent(this@NewGameSelectionActivity, LoginActivity::class.java)
                     startActivity(intent)
                 } else {
-                    Toast.makeText(this@NewGameSelectionActivity, "Error while getting friends: " + response.code(), Toast.LENGTH_LONG)
+                    Toast.makeText(
+                        this@NewGameSelectionActivity,
+                        "Error while getting friends: " + response.code(),
+                        Toast.LENGTH_LONG
+                    )
                         .show()
                 }
             }
